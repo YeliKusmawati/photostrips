@@ -18,6 +18,18 @@ const FILTERS = [
   { label: "Y2K", emoji: "💿", value: "saturate(180%) hue-rotate(15deg) contrast(110%)" },
 ];
 
+// ✅ Gaya tulisan caption
+const CAPTION_STYLES = [
+  { id: "classic", label: "Classic", emoji: "✍️", font: "italic 26px Georgia, serif", color: null, effect: "none" },
+  { id: "bold", label: "Bold", emoji: "🅱️", font: '900 28px "Space Grotesk", sans-serif', color: null, effect: "none" },
+  { id: "script", label: "Script", emoji: "🖋️", font: 'italic 32px "Playfair Display", serif', color: null, effect: "none" },
+  { id: "cute", label: "Cute", emoji: "🎀", font: '600 26px "Quicksand", sans-serif', color: "#ec4899", effect: "glow-pink" },
+  { id: "neon", label: "Neon", emoji: "💜", font: '700 26px "Space Grotesk", sans-serif', color: "#a855f7", effect: "glow-purple" },
+  { id: "retro", label: "Retro", emoji: "📼", font: '900 26px "Playfair Display", serif', color: "#f59e0b", effect: "shadow-offset" },
+  { id: "minimal", label: "Minimal", emoji: "◽", font: '400 22px "Quicksand", sans-serif', color: "#6b7280", effect: "none" },
+  { id: "outline", label: "Outline", emoji: "⭕", font: '900 28px "Space Grotesk", sans-serif', color: "#ffffff", effect: "outline" },
+];
+
 const FRAMES = [
   { id: "white", label: "Putih", bg: "#ffffff", accent: "#e9d5ff", pattern: "solid" },
   { id: "pink", label: "Pink", bg: "#fce7f3", accent: "#f9a8d4", pattern: "solid" },
@@ -505,6 +517,7 @@ export default function Home() {
   const [currentLayout, setCurrentLayout] = useState("3");
   const [status, setStatus] = useState("Upload foto buat mulai");
   const [caption, setCaption] = useState("");
+  const [captionStyle, setCaptionStyle] = useState("classic");
   const [stickers, setStickers] = useState<Sticker[]>([]);
   const [selectedSticker, setSelectedSticker] = useState<number | null>(null);
   const [dragging, setDragging] = useState<{ id: number; offsetX: number; offsetY: number } | null>(null);
@@ -519,9 +532,11 @@ export default function Home() {
   const [showReviewPopup, setShowReviewPopup] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewHover, setReviewHover] = useState(0);
-  const [reviewName, setReviewName] = useState("");
-  const [reviewText, setReviewText] = useState("");
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
+
+  // ✅ PAKAI REF biar ngetik nama/komentar nggak re-render seluruh Home
+  const reviewNameRef = useRef<HTMLInputElement>(null);
+  const reviewTextRef = useRef<HTMLTextAreaElement>(null);
 
   // ===== FAQ STATE =====
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -582,7 +597,6 @@ export default function Home() {
     const stripW = gridW + PADDING * 2;
     const stripH = PADDING + gridH + PADDING + CAPTION_H;
 
-    // === CANVAS KOTAK kalau ada BG ===
     const isSquare = bgOption.type !== "none";
     let W: number;
     let H: number;
@@ -599,7 +613,6 @@ export default function Home() {
     canvas.width = W;
     canvas.height = H;
 
-    // ===== BACKGROUND =====
     if (bgOption.type === "custom" && customBgImage) {
       const scale = Math.max(W / customBgImage.naturalWidth, H / customBgImage.naturalHeight);
       const drawW = customBgImage.naturalWidth * scale;
@@ -623,7 +636,6 @@ export default function Home() {
       ctx.fillRect(0, 0, W, H);
     }
 
-    // ===== STRIP (position: left, center, right, bottom) =====
     const finalStripW = stripW * stripScale;
     const finalStripH = stripH * stripScale;
 
@@ -640,7 +652,6 @@ export default function Home() {
       stripX = (W - finalStripW) / 2;
       stripY = H - finalStripH - H * 0.06;
     } else {
-      // center
       stripX = (W - finalStripW) / 2;
       stripY = (H - finalStripH) / 2;
     }
@@ -711,15 +722,61 @@ export default function Home() {
     }
 
     if (caption) {
-      ctx.fillStyle = isDarkBg(frame.bg) ? "#e9d5ff" : "#7c3aed";
-      ctx.font = `italic ${26 * SCALE}px Georgia, serif`;
+      const styleOption = CAPTION_STYLES.find((s) => s.id === captionStyle) || CAPTION_STYLES[0];
+      const defaultColor = isDarkBg(frame.bg) ? "#e9d5ff" : "#7c3aed";
+
+      const scaledFont = styleOption.font.replace(/(\d+)px/, (_, n) => `${parseInt(n) * SCALE}px`);
+
+      ctx.font = scaledFont;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(caption, stripW / 2, stripH - CAPTION_H / 2 - 6 * SCALE);
+
+      const captionX = stripW / 2;
+      const captionY = stripH - CAPTION_H / 2 - 6 * SCALE;
+
+      if (styleOption.effect === "glow-pink") {
+        ctx.fillStyle = styleOption.color || defaultColor;
+        ctx.shadowColor = "#fbcfe8";
+        ctx.shadowBlur = 10 * SCALE;
+        ctx.fillText(caption, captionX, captionY);
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = "transparent";
+      } else if (styleOption.effect === "glow-purple") {
+        ctx.fillStyle = styleOption.color || defaultColor;
+        ctx.shadowColor = "#a855f7";
+        ctx.shadowBlur = 20 * SCALE;
+        ctx.fillText(caption, captionX, captionY);
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = "transparent";
+      } else if (styleOption.effect === "shadow-offset") {
+        ctx.fillStyle = styleOption.color || defaultColor;
+        ctx.shadowColor = "rgba(0,0,0,0.35)";
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 4 * SCALE;
+        ctx.shadowOffsetY = 4 * SCALE;
+        ctx.fillText(caption, captionX, captionY);
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.shadowColor = "transparent";
+      } else if (styleOption.effect === "outline") {
+        ctx.lineWidth = 4 * SCALE;
+        ctx.strokeStyle = "#1a1a1a";
+        ctx.strokeText(caption, captionX, captionY);
+        ctx.fillStyle = styleOption.color || "#ffffff";
+        ctx.fillText(caption, captionX, captionY);
+      } else {
+        ctx.fillStyle = styleOption.color || defaultColor;
+        ctx.fillText(caption, captionX, captionY);
+      }
+
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
     }
 
     ctx.restore();
-  }, [images, currentFilter, caption, currentFrame, currentLayout, layout, maxPhotos, stickers, isGarut, garutBW, currentBg, customBgImage, stripScale, stripPosition]);
+  }, [images, currentFilter, caption, captionStyle, currentFrame, currentLayout, layout, maxPhotos, stickers, isGarut, garutBW, currentBg, customBgImage, stripScale, stripPosition]);
 
   useEffect(() => {
     if (images.length > maxPhotos) {
@@ -789,10 +846,13 @@ export default function Home() {
   function handleSubmitReview() {
     if (reviewRating === 0) return;
 
+    const name = reviewNameRef.current?.value.trim() || "Anonim";
+    const text = reviewTextRef.current?.value.trim() || "Mantap! 👍";
+
     const newReview: Review = {
       id: Date.now(),
-      name: reviewName.trim() || "Anonim",
-      text: reviewText.trim() || "Mantap! 👍",
+      name,
+      text,
       rating: reviewRating,
       date: new Date().toISOString(),
     };
@@ -804,8 +864,8 @@ export default function Home() {
       setShowReviewPopup(false);
       setReviewRating(0);
       setReviewHover(0);
-      setReviewName("");
-      setReviewText("");
+      if (reviewNameRef.current) reviewNameRef.current.value = "";
+      if (reviewTextRef.current) reviewTextRef.current.value = "";
       setReviewSubmitted(false);
     }, 2000);
   }
@@ -814,6 +874,7 @@ export default function Home() {
     setImages([]);
     setCurrentFilter("none");
     setCaption("");
+    setCaptionStyle("classic");
     setCurrentFrame("white");
     setStickers([]);
     setSelectedSticker(null);
@@ -902,7 +963,8 @@ export default function Home() {
       : "5.0";
 
   return (
-    <main className={`${quicksand.className} min-h-screen relative overflow-hidden bg-[#fafafa] text-zinc-800`}>
+    // ✅ overflow-x-hidden biar iOS nggak motong konten
+    <main className={`${quicksand.className} min-h-screen relative overflow-x-hidden bg-[#fafafa] text-zinc-800`}>
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.5]"
         style={{
@@ -914,26 +976,6 @@ export default function Home() {
       <div className="absolute top-[-150px] left-[-100px] w-[500px] h-[500px] rounded-full bg-rose-100/60 blur-3xl pointer-events-none" />
       <div className="absolute top-[30%] right-[-150px] w-[500px] h-[500px] rounded-full bg-purple-100/50 blur-3xl pointer-events-none" />
       <div className="absolute bottom-[-150px] left-[15%] w-[500px] h-[500px] rounded-full bg-blue-100/50 blur-3xl pointer-events-none" />
-
-      {/* NAVBAR */}
-      <nav className="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-white/60">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-rose-400 to-purple-400 flex items-center justify-center shadow-lg shadow-rose-200/50">
-              <span className="text-white text-sm">📸</span>
-            </div>
-            <span className={`${space.className} font-bold text-sm tracking-tight text-purple-900`}>
-              Photostrip
-            </span>
-          </div>
-          <a
-            href="#editor"
-            className="text-xs font-bold px-5 py-2.5 rounded-full bg-gradient-to-r from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-200/50 hover:shadow-xl hover:shadow-rose-300/60 hover:scale-105 transition-all"
-          >
-            Mulai
-          </a>
-        </div>
-      </nav>
 
       {/* HERO */}
       <section className="relative px-6 pt-16 pb-20 md:pt-24 md:pb-28 overflow-hidden">
@@ -954,7 +996,7 @@ export default function Home() {
               <div className="h-px w-8 bg-gradient-to-l from-transparent to-rose-300 lg:hidden" />
             </div>
 
-            <h1 className={`${space.className} text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-8 text-purple-900 relative`}>
+            <h1 className={`${space.className} text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-8 text-purple-900 relative`}>
               Bikin
               <br />
               <span className="relative inline-block">
@@ -1014,14 +1056,15 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="relative flex justify-center items-center h-[500px] md:h-[560px]">
-            <div className="absolute left-0 md:left-4 top-16 w-32 md:w-44 bg-white rounded-2xl p-2 shadow-2xl shadow-purple-300/50 -rotate-6 border border-white/80 hover:rotate-0 hover:z-20 transition-all duration-300">
+          {/* ✅ Hero preview responsif */}
+          <div className="relative flex justify-center items-center h-[420px] sm:h-[500px] md:h-[560px]">
+            <div className="absolute left-0 md:left-4 top-16 w-28 sm:w-32 md:w-44 bg-white rounded-2xl p-2 shadow-2xl shadow-purple-300/50 -rotate-6 border border-white/80 hover:rotate-0 hover:z-20 transition-all duration-300">
               <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=400&fit=crop" alt="Preview 1" className="aspect-square w-full rounded-xl object-cover mb-1.5" />
               <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop" alt="Preview 2" className="aspect-square w-full rounded-xl object-cover mb-1.5" />
               <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop" alt="Preview 3" className="aspect-square w-full rounded-xl object-cover" />
             </div>
 
-            <div className="relative w-44 md:w-56 bg-white rounded-2xl p-2.5 shadow-2xl shadow-purple-400/50 rotate-2 border border-white/80 z-10 hover:rotate-0 transition-all duration-300">
+            <div className="relative w-40 sm:w-44 md:w-56 bg-white rounded-2xl p-2.5 shadow-2xl shadow-purple-400/50 rotate-2 border border-white/80 z-10 hover:rotate-0 transition-all duration-300">
               <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop" alt="Preview utama 1" className="aspect-square w-full rounded-xl object-cover mb-2" />
               <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" alt="Preview utama 2" className="aspect-square w-full rounded-xl object-cover mb-2" />
               <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop" alt="Preview utama 3" className="aspect-square w-full rounded-xl object-cover" />
@@ -1030,10 +1073,10 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="absolute right-0 md:right-4 top-20 w-32 md:w-44 bg-white rounded-2xl p-2 shadow-2xl shadow-purple-300/50 rotate-6 border border-white/80 hover:rotate-0 hover:z-20 transition-all duration-300">
+            <div className="absolute right-0 md:right-4 top-20 w-28 sm:w-32 md:w-44 bg-white rounded-2xl p-2 shadow-2xl shadow-purple-300/50 rotate-6 border border-white/80 hover:rotate-0 hover:z-20 transition-all duration-300">
               <img src="https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=400&h=400&fit=crop" alt="Preview 4" className="aspect-square w-full rounded-xl object-cover mb-1.5" />
               <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=400&fit=crop" alt="Preview 5" className="aspect-square w-full rounded-xl object-cover mb-1.5" />
-              <img src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&h=400&fit=crop" alt="Preview 6" className="aspect-square w-full rounded-xl object-cover" />
+              <img src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&h=400&fit=crop" alt="Preview 6" className="aspect-square rounded-xl object-cover" />
             </div>
           </div>
         </div>
@@ -1046,7 +1089,7 @@ export default function Home() {
             <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-rose-500 text-xs font-bold mb-4 shadow-sm">
               🎯 CARA PAKAI
             </span>
-            <h2 className={`${space.className} text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900`}>
+            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900`}>
               Cuma 3 langkah, langsung jadi
             </h2>
           </div>
@@ -1077,7 +1120,7 @@ export default function Home() {
             <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-pink-500 text-xs font-bold mb-4 shadow-sm">
               ✨ FITUR
             </span>
-            <h2 className={`${space.className} text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900`}>
+            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900`}>
               Semua yang kamu butuhin, tanpa yang gak perlu.
             </h2>
           </div>
@@ -1109,14 +1152,15 @@ export default function Home() {
             <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-purple-500 text-xs font-bold mb-4 shadow-sm">
               🎨 EDITOR
             </span>
-            <h2 className={`${space.className} text-4xl md:text-5xl font-bold leading-tight tracking-tight mb-3 text-purple-900`}>
+            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight mb-3 text-purple-900`}>
               Bikin photostrip kamu
             </h2>
             <p className="text-sm text-purple-700/70">Pilih layout, upload foto, atur tampilan, download.</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8 items-start">
-            <div className="space-y-5 lg:sticky lg:top-24">
+            {/* ✅ order-2 di HP, order-1 di desktop → canvas muncul DULU di HP */}
+            <div className="space-y-5 lg:sticky lg:top-24 order-2 lg:order-1">
               <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-5 shadow-xl shadow-purple-200/30 border border-white/80">
                 <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-600">📐 Layout</h3>
                 <div className="grid grid-cols-3 gap-2">
@@ -1262,7 +1306,7 @@ export default function Home() {
                           <div className="grid grid-cols-2 gap-2">
                             <button
                               onClick={() => setStripPosition("left")}
-                              className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
+                              className={`py-3 rounded-xl text-xs font-bold transition-all ${
                                 stripPosition === "left"
                                   ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
                                   : "bg-white/60 text-purple-700 hover:bg-white"
@@ -1272,7 +1316,7 @@ export default function Home() {
                             </button>
                             <button
                               onClick={() => setStripPosition("center")}
-                              className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
+                              className={`py-3 rounded-xl text-xs font-bold transition-all ${
                                 stripPosition === "center"
                                   ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
                                   : "bg-white/60 text-purple-700 hover:bg-white"
@@ -1282,7 +1326,7 @@ export default function Home() {
                             </button>
                             <button
                               onClick={() => setStripPosition("right")}
-                              className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
+                              className={`py-3 rounded-xl text-xs font-bold transition-all ${
                                 stripPosition === "right"
                                   ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
                                   : "bg-white/60 text-purple-700 hover:bg-white"
@@ -1292,7 +1336,7 @@ export default function Home() {
                             </button>
                             <button
                               onClick={() => setStripPosition("bottom")}
-                              className={`py-2.5 rounded-xl text-xs font-bold transition-all ${
+                              className={`py-3 rounded-xl text-xs font-bold transition-all ${
                                 stripPosition === "bottom"
                                   ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
                                   : "bg-white/60 text-purple-700 hover:bg-white"
@@ -1341,7 +1385,8 @@ export default function Home() {
                         </button>
                       )}
                     </div>
-                    <div className="grid grid-cols-8 gap-1.5">
+                    {/* ✅ Grid stiker adaptif */}
+                    <div className="grid grid-cols-6 sm:grid-cols-8 gap-1.5">
                       {STICKER_PRESETS.map((emoji) => (
                         <button
                           key={emoji}
@@ -1379,7 +1424,8 @@ export default function Home() {
 
                   <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-5 shadow-xl shadow-purple-200/30 border border-white/80">
                     <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-600">🖼️ Bingkai</h3>
-                    <div className="grid grid-cols-6 gap-2 max-h-72 overflow-y-auto pr-1">
+                    {/* ✅ Grid bingkai adaptif */}
+                    <div className="grid grid-cols-5 sm:grid-cols-6 gap-2 max-h-72 overflow-y-auto pr-1">
                       {FRAMES.map((f) => (
                         <button
                           key={f.id}
@@ -1402,7 +1448,8 @@ export default function Home() {
 
                   <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-5 shadow-xl shadow-purple-200/30 border border-white/80">
                     <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-600">🎨 Filter</h3>
-                    <div className="grid grid-cols-4 gap-2">
+                    {/* ✅ Grid filter adaptif */}
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                       {FILTERS.map((f) => (
                         <button
                           key={f.value}
@@ -1420,6 +1467,7 @@ export default function Home() {
                     </div>
                   </div>
 
+                  {/* ✅ CAPTION dengan gaya tulisan */}
                   <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-5 shadow-xl shadow-purple-200/30 border border-white/80">
                     <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-600">✍️ Caption</h3>
                     <input
@@ -1428,20 +1476,42 @@ export default function Home() {
                       onChange={(e) => setCaption(e.target.value)}
                       placeholder="Contoh: 2025 vibes"
                       maxLength={30}
-                      className="w-full px-4 py-3 rounded-2xl bg-white/80 text-purple-900 text-sm placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-rose-300 transition-all font-medium"
+                      className="w-full px-4 py-3 rounded-2xl bg-white/80 text-purple-900 text-sm placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-rose-300 transition-all font-medium mb-3"
                     />
+
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-purple-500 mb-2">
+                      Gaya Tulisan
+                    </p>
+                    {/* ✅ Grid caption style adaptif */}
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                      {CAPTION_STYLES.map((s) => (
+                        <button
+                          key={s.id}
+                          onClick={() => setCaptionStyle(s.id)}
+                          className={`aspect-square rounded-2xl flex flex-col items-center justify-center text-xs font-bold transition-all ${
+                            captionStyle === s.id
+                              ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
+                              : "bg-white/60 text-purple-700 hover:bg-white hover:shadow-md"
+                          }`}
+                        >
+                          <span className="text-lg mb-0.5">{s.emoji}</span>
+                          <span className="text-[9px] leading-tight">{s.label}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </>
               )}
             </div>
 
-            <div className="flex flex-col items-center">
-              <div className="w-full bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-2xl shadow-purple-300/30 border border-white/80">
+            {/* ✅ order-1 di HP, order-2 di desktop → canvas muncul DULU di HP */}
+            <div className="flex flex-col items-center order-1 lg:order-2">
+              <div className="w-full bg-white/70 backdrop-blur-xl rounded-3xl p-4 sm:p-6 shadow-2xl shadow-purple-300/30 border border-white/80">
                 <div className="relative inline-block w-full">
                   <canvas
                     ref={canvasRef}
                     className="block mx-auto rounded-2xl"
-                    style={{ maxWidth: "100%", maxHeight: isGarut ? "85vh" : "70vh", height: "auto" }}
+                    style={{ maxWidth: "100%", maxHeight: isGarut ? "85vh" : "60vh", height: "auto" }}
                   />
                   <div
                     className="absolute inset-0 pointer-events-none"
@@ -1472,7 +1542,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex justify-center gap-3 mt-6">
+              <div className="flex justify-center gap-3 mt-6 flex-wrap">
                 <button
                   onClick={handleDownload}
                   disabled={images.length === 0}
@@ -1501,7 +1571,7 @@ export default function Home() {
             <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-rose-500 text-xs font-bold mb-4 shadow-sm">
               💬 KATA MEREKA
             </span>
-            <h2 className={`${space.className} text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900 mb-4`}>
+            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900 mb-4`}>
               Udah dipake banyak orang
             </h2>
 
@@ -1555,7 +1625,7 @@ export default function Home() {
             <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-purple-500 text-xs font-bold mb-4 shadow-sm">
               ❓ FAQ
             </span>
-            <h2 className={`${space.className} text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900`}>
+            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900`}>
               Pertanyaan yang sering ditanya
             </h2>
           </div>
@@ -1570,7 +1640,7 @@ export default function Home() {
                 >
                   <button
                     onClick={() => setOpenFaq(isOpen ? null : i)}
-                    className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left hover:bg-white/50 transition-all"
+                    className="w-full flex items-center justify-between gap-4 px-5 sm:px-6 py-5 text-left hover:bg-white/50 transition-all"
                   >
                     <span className={`${space.className} text-sm md:text-base font-bold text-purple-900`}>
                       {faq.q}
@@ -1589,7 +1659,7 @@ export default function Home() {
                     }`}
                   >
                     <div className="overflow-hidden">
-                      <p className="px-6 pb-5 text-sm text-purple-700/80 leading-relaxed font-medium">
+                      <p className="px-5 sm:px-6 pb-5 text-sm text-purple-700/80 leading-relaxed font-medium">
                         {faq.a}
                       </p>
                     </div>
@@ -1603,8 +1673,8 @@ export default function Home() {
 
       {/* CTA FINAL */}
       <section className="relative px-6 py-20">
-        <div className="max-w-3xl mx-auto text-center bg-gradient-to-br from-rose-200/60 via-pink-200/60 to-purple-200/60 backdrop-blur-xl rounded-3xl p-12 shadow-2xl shadow-rose-200/40 border border-white/80">
-          <h2 className={`${space.className} text-3xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900 mb-4`}>
+        <div className="max-w-3xl mx-auto text-center bg-gradient-to-br from-rose-200/60 via-pink-200/60 to-purple-200/60 backdrop-blur-xl rounded-3xl p-8 sm:p-12 shadow-2xl shadow-rose-200/40 border border-white/80">
+          <h2 className={`${space.className} text-2xl sm:text-3xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900 mb-4`}>
             Siap bikin photostrip kamu?
           </h2>
           <p className="text-sm md:text-base text-purple-700/80 mb-8 font-medium">
@@ -1693,7 +1763,7 @@ export default function Home() {
           </div>
 
           <div className="border-t border-purple-200/50 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs font-bold text-purple-500">
+            <p className="text-xs font-bold text-purple-500 text-center md:text-left">
               © {new Date().getFullYear()} Photostrip · Dibuat dengan 💜 buat kamu
             </p>
             <div className="flex gap-5">
@@ -1712,7 +1782,7 @@ export default function Home() {
           onClick={() => !reviewSubmitted && setShowReviewPopup(false)}
         >
           <div
-            className="relative bg-white rounded-3xl p-7 md:p-8 shadow-2xl max-w-md w-full border border-white/80 animate-[popIn_0.4s_ease]"
+            className="relative bg-white rounded-3xl p-6 sm:p-7 md:p-8 shadow-2xl max-w-md w-full border border-white/80 animate-[popIn_0.4s_ease]"
             onClick={(e) => e.stopPropagation()}
           >
             {!reviewSubmitted ? (
@@ -1726,7 +1796,7 @@ export default function Home() {
 
                 <div className="text-center mb-6">
                   <div className="text-5xl mb-3">🎉</div>
-                  <h3 className={`${space.className} text-2xl font-bold text-purple-900 mb-2`}>
+                  <h3 className={`${space.className} text-xl sm:text-2xl font-bold text-purple-900 mb-2`}>
                     Gimana hasilnya?
                   </h3>
                   <p className="text-sm text-purple-600 font-medium">
@@ -1734,7 +1804,8 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="flex justify-center gap-2 mb-6">
+                {/* ✅ Bintang responsif */}
+                <div className="flex justify-center gap-1 sm:gap-2 mb-6">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
@@ -1742,7 +1813,7 @@ export default function Home() {
                       onMouseEnter={() => setReviewHover(star)}
                       onMouseLeave={() => setReviewHover(0)}
                       onClick={() => setReviewRating(star)}
-                      className="text-5xl transition-all hover:scale-125 active:scale-95"
+                      className="text-4xl sm:text-5xl transition-all hover:scale-125 active:scale-95"
                     >
                       <span
                         className={
@@ -1768,17 +1839,15 @@ export default function Home() {
                 )}
 
                 <input
+                  ref={reviewNameRef}
                   type="text"
-                  value={reviewName}
-                  onChange={(e) => setReviewName(e.target.value)}
                   placeholder="Nama kamu (opsional)"
                   maxLength={20}
                   className="w-full px-4 py-3 rounded-2xl bg-purple-50 text-purple-900 text-sm placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-rose-300 transition-all font-medium mb-3"
                 />
 
                 <textarea
-                  value={reviewText}
-                  onChange={(e) => setReviewText(e.target.value)}
+                  ref={reviewTextRef}
                   placeholder="Tulis komentar kamu (opsional)"
                   maxLength={150}
                   rows={3}
