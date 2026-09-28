@@ -18,7 +18,6 @@ const FILTERS = [
   { label: "Y2K", emoji: "💿", value: "saturate(180%) hue-rotate(15deg) contrast(110%)" },
 ];
 
-// ✅ Gaya tulisan caption
 const CAPTION_STYLES = [
   { id: "classic", label: "Classic", emoji: "✍️", font: "italic 26px Georgia, serif", color: null, effect: "none" },
   { id: "bold", label: "Bold", emoji: "🅱️", font: '900 28px "Space Grotesk", sans-serif', color: null, effect: "none" },
@@ -93,6 +92,22 @@ const LAYOUTS = [
 
 const STICKER_PRESETS = ["✨", "💖", "🌈", "⭐", "🦋", "🌸", "💫", "🍓", "🧸", "☁️", "🫧", "💿", "🎀", "🌷", "🍒", "🐰"];
 
+// ✅ Posisi sticker — di UJUNG-UJUNG KOTAK photostrip
+// x: 0 = kiri strip, 1 = kanan strip | y: 0 = atas strip, 1 = bawah strip
+const AESTHETIC_POSITIONS = [
+  // ── 4 POJOK UTAMA (ujung-ujung kotak) ──
+  { x: 0.05, y: 0.03 },   // pojok kiri-atas
+  { x: 0.95, y: 0.03 },   // pojok kanan-atas
+  { x: 0.05, y: 0.97 },   // pojok kiri-bawah
+  { x: 0.95, y: 0.97 },   // pojok kanan-bawah
+
+  // ── Ujung tengah (variasi kalau 4 pojok udah keisi) ──
+  { x: 0.5,  y: 0.03 },   // ujung atas-tengah
+  { x: 0.5,  y: 0.97 },   // ujung bawah-tengah
+  { x: 0.05, y: 0.5 },    // ujung kiri-tengah
+  { x: 0.95, y: 0.5 },    // ujung kanan-tengah
+];
+
 const DUMMY_TESTIMONIALS = [
   { emoji: "💖", name: "Sasa", text: "hasilnya cakep banget, langsung jadi feed IG estetik", rating: 5 },
   { emoji: "🌸", name: "Naya", text: "gampang banget dipake, sekali coba langsung suka", rating: 5 },
@@ -100,30 +115,12 @@ const DUMMY_TESTIMONIALS = [
 ];
 
 const FAQS = [
-  {
-    q: "Photostrip ini beneran gratis?",
-    a: "Iya, 100% gratis tanpa watermark, tanpa login, dan tanpa batasan jumlah download. Kamu bisa pakai sepuasnya.",
-  },
-  {
-    q: "Fotoku aman nggak?",
-    a: "Aman banget. Semua proses edit terjadi di browser kamu sendiri. Foto nggak pernah di-upload ke server manapun.",
-  },
-  {
-    q: "Bisa dipakai di HP?",
-    a: "Bisa! Web ini responsive, jalan lancar di HP Android, iPhone, tablet, maupun laptop.",
-  },
-  {
-    q: "Hasilnya bisa buat Instagram atau TikTok?",
-    a: "Tentu. Kalau kamu pakai background, canvas otomatis jadi kotak 1:1 yang pas buat feed IG. Buat TikTok, tinggal crop atau pakai layout portrait.",
-  },
-  {
-    q: "Kenapa rating dan komentarku hilang?",
-    a: "Saat ini rating disimpan di browser kamu (localStorage). Kalau kamu hapus cache browser, rating akan hilang. Kami sedang develop versi online biar tersimpan permanen.",
-  },
-  {
-    q: "Bisa bikin koran juga?",
-    a: "Bisa! Pilih layout 'Koran Garut' di menu layout, upload 1 foto, dan hasilnya jadi koran aesthetic ala TikTok.",
-  },
+  { q: "Photostrip ini beneran gratis?", a: "Iya, 100% gratis tanpa watermark, tanpa login, dan tanpa batasan jumlah download. Kamu bisa pakai sepuasnya." },
+  { q: "Fotoku aman nggak?", a: "Aman banget. Semua proses edit terjadi di browser kamu sendiri. Foto nggak pernah di-upload ke server manapun." },
+  { q: "Bisa dipakai di HP?", a: "Bisa! Web ini responsive, jalan lancar di HP Android, iPhone, tablet, maupun laptop." },
+  { q: "Hasilnya bisa buat Instagram atau TikTok?", a: "Tentu. Kalau kamu pakai background, canvas otomatis jadi kotak 1:1 yang pas buat feed IG. Buat TikTok, tinggal crop atau pakai layout portrait." },
+  { q: "Kenapa rating dan komentarku hilang?", a: "Saat ini rating disimpan di browser kamu (localStorage). Kalau kamu hapus cache browser, rating akan hilang. Kami sedang develop versi online biar tersimpan permanen." },
+  { q: "Bisa bikin koran juga?", a: "Bisa! Pilih layout 'Koran Garut' di menu layout, upload 1 foto, dan hasilnya jadi koran aesthetic ala TikTok." },
 ];
 
 const GARUT_MASTHEAD = "GARUT";
@@ -139,21 +136,8 @@ const GARUT_CAPTION = "Foto: Dokumentasi pribadi · Hak cipta dilindungi";
 const GARUT_BODY_1 = "Garut adalah sebuah kabupaten di Jawa Barat yang terkenal dengan keindahan alamnya. Dari pegunungan yang hijau hingga pantai selatan yang eksotis, Garut menawarkan pesona yang tak pernah habis untuk dijelajahi.";
 const GARUT_BODY_2 = "Selain alam, Garut juga kaya akan budaya dan kuliner khas. Dodol Garut, domba priangan, dan berbagai kesenian tradisional menjadi bagian tak terpisahkan dari identitas kota ini.";
 
-type Sticker = {
-  id: number;
-  emoji: string;
-  x: number;
-  y: number;
-  size: number;
-};
-
-type Review = {
-  id: number;
-  name: string;
-  text: string;
-  rating: number;
-  date: string;
-};
+type Sticker = { id: number; emoji: string; x: number; y: number; size: number; };
+type Review = { id: number; name: string; text: string; rating: number; date: string; };
 
 function isDarkBg(hex: string) {
   const c = hex.replace("#", "");
@@ -506,6 +490,238 @@ function renderKoranGarut(ctx: CanvasRenderingContext2D, image: HTMLImageElement
   ctx.fillText(`© ${today.getFullYear()} ${GARUT_MASTHEAD} · Semua hak dilindungi`, W / 2, footerY);
 }
 
+function renderStripToCanvas(
+  canvas: HTMLCanvasElement,
+  opts: {
+    images: HTMLImageElement[];
+    currentFilter: string;
+    caption: string;
+    captionStyle: string;
+    currentFrame: string;
+    currentLayout: string;
+    maxPhotos: number;
+    layout: typeof LAYOUTS[number];
+    stickers: Sticker[];
+    isGarut: boolean;
+    garutBW: boolean;
+    currentBg: string;
+    customBgImage: HTMLImageElement | null;
+    stripScale: number;
+    stripPosition: "left" | "center" | "right" | "bottom";
+    SCALE: number;
+  }
+) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const {
+    images, currentFilter, caption, captionStyle, currentFrame, maxPhotos, layout,
+    stickers, isGarut, garutBW, currentBg, customBgImage, stripScale, stripPosition, SCALE,
+  } = opts;
+
+  if (isGarut) {
+    renderKoranGarut(ctx, images[0] || null, garutBW);
+    return;
+  }
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+
+  const frame = FRAMES.find((f) => f.id === currentFrame) || FRAMES[0];
+  const bgOption = BACKGROUNDS.find((b) => b.id === currentBg) || BACKGROUNDS[0];
+
+  const PADDING = 20 * SCALE;
+  const GAP = 10 * SCALE;
+  const CAPTION_H = caption ? 44 * SCALE : 0;
+  const PHOTO_SIZE = (layout.cols === 1 ? 260 : 170) * SCALE;
+  const rows = Math.ceil(maxPhotos / layout.cols);
+
+  const gridW = PHOTO_SIZE * layout.cols + GAP * (layout.cols - 1);
+  const gridH = PHOTO_SIZE * rows + GAP * (rows - 1);
+  const stripW = gridW + PADDING * 2;
+  const stripH = PADDING + gridH + PADDING + CAPTION_H;
+
+  const isSquare = bgOption.type !== "none";
+  let W: number;
+  let H: number;
+
+  if (isSquare) {
+    const baseSize = Math.max(stripW, stripH);
+    W = baseSize * 1.25;
+    H = W;
+  } else {
+    W = stripW;
+    H = stripH;
+  }
+
+  canvas.width = W;
+  canvas.height = H;
+
+  if (bgOption.type === "custom" && customBgImage) {
+    const scale = Math.max(W / customBgImage.naturalWidth, H / customBgImage.naturalHeight);
+    const drawW = customBgImage.naturalWidth * scale;
+    const drawH = customBgImage.naturalHeight * scale;
+    const dx = (W - drawW) / 2;
+    const dy = (H - drawH) / 2;
+    ctx.drawImage(customBgImage, dx, dy, drawW, drawH);
+  } else if (bgOption.type === "solid" && bgOption.color) {
+    ctx.fillStyle = bgOption.color;
+    ctx.fillRect(0, 0, W, H);
+  } else if (bgOption.type === "emoji" && bgOption.emoji && bgOption.color) {
+    ctx.fillStyle = bgOption.color;
+    ctx.fillRect(0, 0, W, H);
+    drawEmojiPattern(ctx, bgOption.emoji, W, H, SCALE);
+  } else if (bgOption.type === "emoji-mix" && bgOption.color) {
+    ctx.fillStyle = bgOption.color;
+    ctx.fillRect(0, 0, W, H);
+    drawMixEmojiPattern(ctx, W, H, SCALE);
+  } else {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  const finalStripW = stripW * stripScale;
+  const finalStripH = stripH * stripScale;
+
+  let stripX: number;
+  let stripY: number;
+
+  if (stripPosition === "left") {
+    stripX = W * 0.06;
+    stripY = (H - finalStripH) / 2;
+  } else if (stripPosition === "right") {
+    stripX = W - finalStripW - W * 0.06;
+    stripY = (H - finalStripH) / 2;
+  } else if (stripPosition === "bottom") {
+    stripX = (W - finalStripW) / 2;
+    stripY = H - finalStripH - H * 0.06;
+  } else {
+    stripX = (W - finalStripW) / 2;
+    stripY = (H - finalStripH) / 2;
+  }
+
+  ctx.save();
+  ctx.translate(stripX, stripY);
+  ctx.scale(stripScale, stripScale);
+
+  ctx.fillStyle = frame.bg;
+  ctx.fillRect(0, 0, stripW, stripH);
+
+  if (frame.pattern && frame.pattern !== "solid" && frame.patternColor) {
+    drawPattern(ctx, frame.pattern, frame.patternColor, stripW, stripH, SCALE);
+  }
+
+  const slots = getLayoutSlots(layout, PADDING, GAP, PHOTO_SIZE);
+
+  if (images.length === 0) {
+    ctx.fillStyle = frame.accent;
+    for (const slot of slots) {
+      ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
+    }
+    ctx.font = `bold ${56 * SCALE}px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("📸", stripW / 2, stripH / 2);
+    ctx.restore();
+    return;
+  }
+
+  for (let i = 0; i < maxPhotos; i++) {
+    const slot = slots[i];
+    if (!slot) continue;
+    const img = images[i];
+
+    if (img) {
+      const scale = Math.max(slot.w / img.naturalWidth, slot.h / img.naturalHeight);
+      const drawW = img.naturalWidth * scale;
+      const drawH = img.naturalHeight * scale;
+      const dx = slot.x + (slot.w - drawW) / 2;
+      const dy = slot.y + (slot.h - drawH) / 2;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(slot.x, slot.y, slot.w, slot.h);
+      ctx.clip();
+      ctx.filter = currentFilter === "none" ? "none" : currentFilter;
+      ctx.drawImage(img, dx, dy, drawW, drawH);
+      ctx.filter = "none";
+      ctx.restore();
+    } else {
+      ctx.fillStyle = frame.accent;
+      ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
+      ctx.fillStyle = isDarkBg(frame.accent) ? "#e9d5ff" : frame.bg;
+      ctx.font = `bold ${48 * SCALE}px sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("+", slot.x + slot.w / 2, slot.y + slot.h / 2);
+    }
+  }
+
+  // ✅ Gambar sticker DI CANVAS — di ujung-ujung kotak
+  for (const s of stickers) {
+    const size = s.size * stripW;
+    ctx.font = `${size}px serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(s.emoji, s.x * stripW, s.y * stripH);
+  }
+
+  if (caption) {
+    const styleOption = CAPTION_STYLES.find((s) => s.id === captionStyle) || CAPTION_STYLES[0];
+    const defaultColor = isDarkBg(frame.bg) ? "#e9d5ff" : "#7c3aed";
+    const scaledFont = styleOption.font.replace(/(\d+)px/, (_, n) => `${parseInt(n) * SCALE}px`);
+
+    ctx.font = scaledFont;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    const captionX = stripW / 2;
+    const captionY = stripH - CAPTION_H / 2 - 6 * SCALE;
+
+    if (styleOption.effect === "glow-pink") {
+      ctx.fillStyle = styleOption.color || defaultColor;
+      ctx.shadowColor = "#fbcfe8";
+      ctx.shadowBlur = 10 * SCALE;
+      ctx.fillText(caption, captionX, captionY);
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = "transparent";
+    } else if (styleOption.effect === "glow-purple") {
+      ctx.fillStyle = styleOption.color || defaultColor;
+      ctx.shadowColor = "#a855f7";
+      ctx.shadowBlur = 20 * SCALE;
+      ctx.fillText(caption, captionX, captionY);
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = "transparent";
+    } else if (styleOption.effect === "shadow-offset") {
+      ctx.fillStyle = styleOption.color || defaultColor;
+      ctx.shadowColor = "rgba(0,0,0,0.35)";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 4 * SCALE;
+      ctx.shadowOffsetY = 4 * SCALE;
+      ctx.fillText(caption, captionX, captionY);
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.shadowColor = "transparent";
+    } else if (styleOption.effect === "outline") {
+      ctx.lineWidth = 4 * SCALE;
+      ctx.strokeStyle = "#1a1a1a";
+      ctx.strokeText(caption, captionX, captionY);
+      ctx.fillStyle = styleOption.color || "#ffffff";
+      ctx.fillText(caption, captionX, captionY);
+    } else {
+      ctx.fillStyle = styleOption.color || defaultColor;
+      ctx.fillText(caption, captionX, captionY);
+    }
+
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+  }
+
+  ctx.restore();
+}
+
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
@@ -520,12 +736,16 @@ export default function Home() {
   const [captionStyle, setCaptionStyle] = useState("classic");
   const [stickers, setStickers] = useState<Sticker[]>([]);
   const [selectedSticker, setSelectedSticker] = useState<number | null>(null);
-  const [dragging, setDragging] = useState<{ id: number; offsetX: number; offsetY: number } | null>(null);
   const [garutBW, setGarutBW] = useState(true);
   const [currentBg, setCurrentBg] = useState("none");
   const [customBgImage, setCustomBgImage] = useState<HTMLImageElement | null>(null);
   const [stripScale, setStripScale] = useState(1);
   const [stripPosition, setStripPosition] = useState<"left" | "center" | "right" | "bottom">("center");
+
+  // ✅ Caption pakai ref biar ngetik nggak re-render tiap huruf
+  const captionRef = useRef<HTMLInputElement>(null);
+  const captionDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [captionTick, setCaptionTick] = useState(0);
 
   // ===== REVIEW STATE =====
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -533,250 +753,56 @@ export default function Home() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewHover, setReviewHover] = useState(0);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
-
-  // ✅ PAKAI REF biar ngetik nama/komentar nggak re-render seluruh Home
   const reviewNameRef = useRef<HTMLInputElement>(null);
   const reviewTextRef = useRef<HTMLTextAreaElement>(null);
 
   // ===== FAQ STATE =====
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  // ✅ Deteksi mobile untuk SCALE
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const SCREEN_SCALE = isMobile ? 3 : 4;
+  const DOWNLOAD_SCALE = 6;
+
   const layout = LAYOUTS.find((l) => l.id === currentLayout) || LAYOUTS[1];
   const maxPhotos = layout.count;
   const isGarut = layout.type === "koran-garut";
 
-  // Load reviews dari localStorage saat pertama kali
   useEffect(() => {
     try {
       const stored = localStorage.getItem("photostrip_reviews");
-      if (stored) {
-        setReviews(JSON.parse(stored));
-      }
+      if (stored) setReviews(JSON.parse(stored));
     } catch (e) {
       console.error("Gagal load reviews:", e);
     }
   }, []);
 
-  // Simpan reviews ke localStorage setiap kali berubah
   useEffect(() => {
     try {
-      if (reviews.length > 0) {
-        localStorage.setItem("photostrip_reviews", JSON.stringify(reviews));
-      }
+      if (reviews.length > 0) localStorage.setItem("photostrip_reviews", JSON.stringify(reviews));
     } catch (e) {
       console.error("Gagal save reviews:", e);
     }
   }, [reviews]);
 
+  // ✅ Render canvas LAYAR
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    if (isGarut) {
-      renderKoranGarut(ctx, images[0] || null, garutBW);
-      return;
-    }
-
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-
-    const frame = FRAMES.find((f) => f.id === currentFrame) || FRAMES[0];
-    const bgOption = BACKGROUNDS.find((b) => b.id === currentBg) || BACKGROUNDS[0];
-
-    const SCALE = 5;
-    const PADDING = 20 * SCALE;
-    const GAP = 10 * SCALE;
-    const CAPTION_H = caption ? 44 * SCALE : 0;
-    const PHOTO_SIZE = (layout.cols === 1 ? 260 : 170) * SCALE;
-    const rows = Math.ceil(maxPhotos / layout.cols);
-
-    const gridW = PHOTO_SIZE * layout.cols + GAP * (layout.cols - 1);
-    const gridH = PHOTO_SIZE * rows + GAP * (rows - 1);
-    const stripW = gridW + PADDING * 2;
-    const stripH = PADDING + gridH + PADDING + CAPTION_H;
-
-    const isSquare = bgOption.type !== "none";
-    let W: number;
-    let H: number;
-
-    if (isSquare) {
-      const baseSize = Math.max(stripW, stripH);
-      W = baseSize * 1.25;
-      H = W;
-    } else {
-      W = stripW;
-      H = stripH;
-    }
-
-    canvas.width = W;
-    canvas.height = H;
-
-    if (bgOption.type === "custom" && customBgImage) {
-      const scale = Math.max(W / customBgImage.naturalWidth, H / customBgImage.naturalHeight);
-      const drawW = customBgImage.naturalWidth * scale;
-      const drawH = customBgImage.naturalHeight * scale;
-      const dx = (W - drawW) / 2;
-      const dy = (H - drawH) / 2;
-      ctx.drawImage(customBgImage, dx, dy, drawW, drawH);
-    } else if (bgOption.type === "solid" && bgOption.color) {
-      ctx.fillStyle = bgOption.color;
-      ctx.fillRect(0, 0, W, H);
-    } else if (bgOption.type === "emoji" && bgOption.emoji && bgOption.color) {
-      ctx.fillStyle = bgOption.color;
-      ctx.fillRect(0, 0, W, H);
-      drawEmojiPattern(ctx, bgOption.emoji, W, H, SCALE);
-    } else if (bgOption.type === "emoji-mix" && bgOption.color) {
-      ctx.fillStyle = bgOption.color;
-      ctx.fillRect(0, 0, W, H);
-      drawMixEmojiPattern(ctx, W, H, SCALE);
-    } else {
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, W, H);
-    }
-
-    const finalStripW = stripW * stripScale;
-    const finalStripH = stripH * stripScale;
-
-    let stripX: number;
-    let stripY: number;
-
-    if (stripPosition === "left") {
-      stripX = W * 0.06;
-      stripY = (H - finalStripH) / 2;
-    } else if (stripPosition === "right") {
-      stripX = W - finalStripW - W * 0.06;
-      stripY = (H - finalStripH) / 2;
-    } else if (stripPosition === "bottom") {
-      stripX = (W - finalStripW) / 2;
-      stripY = H - finalStripH - H * 0.06;
-    } else {
-      stripX = (W - finalStripW) / 2;
-      stripY = (H - finalStripH) / 2;
-    }
-
-    ctx.save();
-    ctx.translate(stripX, stripY);
-    ctx.scale(stripScale, stripScale);
-
-    ctx.fillStyle = frame.bg;
-    ctx.fillRect(0, 0, stripW, stripH);
-
-    if (frame.pattern && frame.pattern !== "solid" && frame.patternColor) {
-      drawPattern(ctx, frame.pattern, frame.patternColor, stripW, stripH, SCALE);
-    }
-
-    const slots = getLayoutSlots(layout, PADDING, GAP, PHOTO_SIZE);
-
-    if (images.length === 0) {
-      ctx.fillStyle = frame.accent;
-      for (const slot of slots) {
-        ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
-      }
-      ctx.font = `bold ${56 * SCALE}px sans-serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("📸", stripW / 2, stripH / 2);
-      ctx.restore();
-      return;
-    }
-
-    for (let i = 0; i < maxPhotos; i++) {
-      const slot = slots[i];
-      if (!slot) continue;
-      const img = images[i];
-
-      if (img) {
-        const scale = Math.max(slot.w / img.naturalWidth, slot.h / img.naturalHeight);
-        const drawW = img.naturalWidth * scale;
-        const drawH = img.naturalHeight * scale;
-        const dx = slot.x + (slot.w - drawW) / 2;
-        const dy = slot.y + (slot.h - drawH) / 2;
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(slot.x, slot.y, slot.w, slot.h);
-        ctx.clip();
-        ctx.filter = currentFilter === "none" ? "none" : currentFilter;
-        ctx.drawImage(img, dx, dy, drawW, drawH);
-        ctx.filter = "none";
-        ctx.restore();
-      } else {
-        ctx.fillStyle = frame.accent;
-        ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
-        ctx.fillStyle = isDarkBg(frame.accent) ? "#e9d5ff" : frame.bg;
-        ctx.font = `bold ${48 * SCALE}px sans-serif`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("+", slot.x + slot.w / 2, slot.y + slot.h / 2);
-      }
-    }
-
-    for (const s of stickers) {
-      const size = s.size * stripW;
-      ctx.font = `${size}px serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(s.emoji, s.x * stripW, s.y * stripH);
-    }
-
-    if (caption) {
-      const styleOption = CAPTION_STYLES.find((s) => s.id === captionStyle) || CAPTION_STYLES[0];
-      const defaultColor = isDarkBg(frame.bg) ? "#e9d5ff" : "#7c3aed";
-
-      const scaledFont = styleOption.font.replace(/(\d+)px/, (_, n) => `${parseInt(n) * SCALE}px`);
-
-      ctx.font = scaledFont;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      const captionX = stripW / 2;
-      const captionY = stripH - CAPTION_H / 2 - 6 * SCALE;
-
-      if (styleOption.effect === "glow-pink") {
-        ctx.fillStyle = styleOption.color || defaultColor;
-        ctx.shadowColor = "#fbcfe8";
-        ctx.shadowBlur = 10 * SCALE;
-        ctx.fillText(caption, captionX, captionY);
-        ctx.shadowBlur = 0;
-        ctx.shadowColor = "transparent";
-      } else if (styleOption.effect === "glow-purple") {
-        ctx.fillStyle = styleOption.color || defaultColor;
-        ctx.shadowColor = "#a855f7";
-        ctx.shadowBlur = 20 * SCALE;
-        ctx.fillText(caption, captionX, captionY);
-        ctx.shadowBlur = 0;
-        ctx.shadowColor = "transparent";
-      } else if (styleOption.effect === "shadow-offset") {
-        ctx.fillStyle = styleOption.color || defaultColor;
-        ctx.shadowColor = "rgba(0,0,0,0.35)";
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetX = 4 * SCALE;
-        ctx.shadowOffsetY = 4 * SCALE;
-        ctx.fillText(caption, captionX, captionY);
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-        ctx.shadowColor = "transparent";
-      } else if (styleOption.effect === "outline") {
-        ctx.lineWidth = 4 * SCALE;
-        ctx.strokeStyle = "#1a1a1a";
-        ctx.strokeText(caption, captionX, captionY);
-        ctx.fillStyle = styleOption.color || "#ffffff";
-        ctx.fillText(caption, captionX, captionY);
-      } else {
-        ctx.fillStyle = styleOption.color || defaultColor;
-        ctx.fillText(caption, captionX, captionY);
-      }
-
-      ctx.shadowColor = "transparent";
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-    }
-
-    ctx.restore();
-  }, [images, currentFilter, caption, captionStyle, currentFrame, currentLayout, layout, maxPhotos, stickers, isGarut, garutBW, currentBg, customBgImage, stripScale, stripPosition]);
+    renderStripToCanvas(canvas, {
+      images, currentFilter, caption, captionStyle, currentFrame, currentLayout,
+      maxPhotos, layout, stickers, isGarut, garutBW, currentBg, customBgImage,
+      stripScale, stripPosition, SCALE: SCREEN_SCALE,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [images, currentFilter, caption, captionTick, captionStyle, currentFrame, currentLayout, maxPhotos, stickers, isGarut, garutBW, currentBg, customBgImage, stripScale, stripPosition, SCREEN_SCALE]);
 
   useEffect(() => {
     if (images.length > maxPhotos) {
@@ -799,9 +825,7 @@ export default function Home() {
           setImages((prev) => {
             const next = [...prev, img];
             setStatus(
-              next.length === maxPhotos
-                ? "Siap! Tinggal download"
-                : `${next.length}/${maxPhotos} foto · tambahin lagi`
+              next.length === maxPhotos ? "Siap! Tinggal download" : `${next.length}/${maxPhotos} foto · tambahin lagi`
             );
             return next;
           });
@@ -831,16 +855,21 @@ export default function Home() {
   }
 
   function handleDownload() {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (images.length === 0) return;
+
+    const offscreen = document.createElement("canvas");
+    renderStripToCanvas(offscreen, {
+      images, currentFilter, caption, captionStyle, currentFrame, currentLayout,
+      maxPhotos, layout, stickers, isGarut, garutBW, currentBg, customBgImage,
+      stripScale, stripPosition, SCALE: DOWNLOAD_SCALE,
+    });
+
     const link = document.createElement("a");
     link.download = `photostrip-${Date.now()}.png`;
-    link.href = canvas.toDataURL("image/png");
+    link.href = offscreen.toDataURL("image/png");
     link.click();
 
-    setTimeout(() => {
-      setShowReviewPopup(true);
-    }, 800);
+    setTimeout(() => setShowReviewPopup(true), 800);
   }
 
   function handleSubmitReview() {
@@ -850,11 +879,7 @@ export default function Home() {
     const text = reviewTextRef.current?.value.trim() || "Mantap! 👍";
 
     const newReview: Review = {
-      id: Date.now(),
-      name,
-      text,
-      rating: reviewRating,
-      date: new Date().toISOString(),
+      id: Date.now(), name, text, rating: reviewRating, date: new Date().toISOString(),
     };
 
     setReviews((prev) => [newReview, ...prev]);
@@ -884,6 +909,7 @@ export default function Home() {
     setStripScale(1);
     setStripPosition("center");
     setStatus("Upload foto buat mulai");
+    if (captionRef.current) captionRef.current.value = "";
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -894,20 +920,38 @@ export default function Home() {
   function handleLayoutChange(id: string) {
     setCurrentLayout(id);
     const newLayout = LAYOUTS.find((l) => l.id === id);
-    if (newLayout) {
-      setStatus(`Layout ${newLayout.label.toLowerCase()} dipilih`);
-    }
+    if (newLayout) setStatus(`Layout ${newLayout.label.toLowerCase()} dipilih`);
   }
 
+  // ✅ AUTO-POSITION: sticker otomatis di ujung-ujung kotak photostrip
   function addSticker(emoji: string) {
     const id = Date.now() + Math.random();
-    setStickers((prev) => [...prev, { id, emoji, x: 0.5, y: 0.5, size: 0.1 }]);
+
+    // Cari slot ujung yang masih kosong
+    const existing = stickers.map((s) => ({ x: s.x, y: s.y }));
+    const available = AESTHETIC_POSITIONS.filter((pos) =>
+      existing.every((e) => Math.hypot(e.x - pos.x, e.y - pos.y) > 0.15)
+    );
+
+    const picked =
+      available.length > 0
+        ? available[Math.floor(Math.random() * available.length)]
+        : AESTHETIC_POSITIONS[Math.floor(Math.random() * AESTHETIC_POSITIONS.length)];
+
+    setStickers((prev) => [...prev, { id, emoji, x: picked.x, y: picked.y, size: 0.08 }]);
     setSelectedSticker(id);
   }
 
   function removeSticker(id: number) {
     setStickers((prev) => prev.filter((s) => s.id !== id));
     if (selectedSticker === id) setSelectedSticker(null);
+  }
+
+  function undoLastSticker() {
+    if (stickers.length === 0) return;
+    const last = stickers[stickers.length - 1];
+    setStickers((prev) => prev.slice(0, -1));
+    if (selectedSticker === last.id) setSelectedSticker(null);
   }
 
   function clearStickers() {
@@ -919,51 +963,22 @@ export default function Home() {
     setStickers((prev) => prev.map((s) => (s.id === id ? { ...s, size } : s)));
   }
 
-  function handleStickerPointerDown(e: React.PointerEvent, id: number) {
-    e.preventDefault();
-    e.stopPropagation();
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const sticker = stickers.find((s) => s.id === id);
-    if (!sticker) return;
-
-    const pointerX = (e.clientX - rect.left) / rect.width;
-    const pointerY = (e.clientY - rect.top) / rect.height;
-
-    setDragging({ id, offsetX: pointerX - sticker.x, offsetY: pointerY - sticker.y });
-    setSelectedSticker(id);
-  }
-
-  function handleCanvasPointerMove(e: React.PointerEvent) {
-    if (!dragging) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const pointerX = (e.clientX - rect.left) / rect.width;
-    const pointerY = (e.clientY - rect.top) / rect.height;
-
-    const newX = Math.max(0, Math.min(1, pointerX - dragging.offsetX));
-    const newY = Math.max(0, Math.min(1, pointerY - dragging.offsetY));
-
-    setStickers((prev) => prev.map((s) => (s.id === dragging.id ? { ...s, x: newX, y: newY } : s)));
-  }
-
-  function handleCanvasPointerUp() {
-    setDragging(null);
+  function handleCaptionChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const val = e.target.value;
+    if (captionDebounceRef.current) clearTimeout(captionDebounceRef.current);
+    captionDebounceRef.current = setTimeout(() => {
+      setCaption(val);
+      setCaptionTick((t) => t + 1);
+    }, 300);
   }
 
   const displayReviews = reviews.length > 0 ? reviews : DUMMY_TESTIMONIALS;
   const avgRating =
     displayReviews.length > 0
-      ? (
-          displayReviews.reduce((sum, r) => sum + ("rating" in r ? r.rating : 5), 0) /
-          displayReviews.length
-        ).toFixed(1)
+      ? (displayReviews.reduce((sum, r) => sum + ("rating" in r ? r.rating : 5), 0) / displayReviews.length).toFixed(1)
       : "5.0";
 
   return (
-    // ✅ overflow-x-hidden biar iOS nggak motong konten
     <main className={`${quicksand.className} min-h-screen relative overflow-x-hidden bg-[#fafafa] text-zinc-800`}>
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.5]"
@@ -1023,17 +1038,11 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start items-center">
-              <a
-                href="#editor"
-                className="group px-8 py-4 rounded-full bg-gradient-to-r from-rose-400 to-pink-400 text-white font-bold text-sm shadow-xl shadow-rose-300/50 hover:shadow-2xl hover:shadow-rose-400/60 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
-              >
+              <a href="#editor" className="group px-8 py-4 rounded-full bg-gradient-to-r from-rose-400 to-pink-400 text-white font-bold text-sm shadow-xl shadow-rose-300/50 hover:shadow-2xl hover:shadow-rose-400/60 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
                 Gas bikin sekarang
                 <span className="group-hover:translate-x-1 transition-transform">→</span>
               </a>
-              <a
-                href="#fitur"
-                className="px-8 py-4 rounded-full bg-white/80 backdrop-blur text-purple-700 font-bold text-sm shadow-lg shadow-purple-200/50 hover:shadow-xl hover:scale-105 active:scale-95 transition-all"
-              >
+              <a href="#fitur" className="px-8 py-4 rounded-full bg-white/80 backdrop-blur text-purple-700 font-bold text-sm shadow-lg shadow-purple-200/50 hover:shadow-xl hover:scale-105 active:scale-95 transition-all">
                 Lihat fitur
               </a>
             </div>
@@ -1056,14 +1065,12 @@ export default function Home() {
             </div>
           </div>
 
-          {/* ✅ Hero preview responsif */}
           <div className="relative flex justify-center items-center h-[420px] sm:h-[500px] md:h-[560px]">
             <div className="absolute left-0 md:left-4 top-16 w-28 sm:w-32 md:w-44 bg-white rounded-2xl p-2 shadow-2xl shadow-purple-300/50 -rotate-6 border border-white/80 hover:rotate-0 hover:z-20 transition-all duration-300">
               <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=400&fit=crop" alt="Preview 1" className="aspect-square w-full rounded-xl object-cover mb-1.5" />
               <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop" alt="Preview 2" className="aspect-square w-full rounded-xl object-cover mb-1.5" />
               <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop" alt="Preview 3" className="aspect-square w-full rounded-xl object-cover" />
             </div>
-
             <div className="relative w-40 sm:w-44 md:w-56 bg-white rounded-2xl p-2.5 shadow-2xl shadow-purple-400/50 rotate-2 border border-white/80 z-10 hover:rotate-0 transition-all duration-300">
               <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop" alt="Preview utama 1" className="aspect-square w-full rounded-xl object-cover mb-2" />
               <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" alt="Preview utama 2" className="aspect-square w-full rounded-xl object-cover mb-2" />
@@ -1072,7 +1079,6 @@ export default function Home() {
                 <p className={`${space.className} text-[10px] font-bold text-purple-700`}>photostrip aesthetic</p>
               </div>
             </div>
-
             <div className="absolute right-0 md:right-4 top-20 w-28 sm:w-32 md:w-44 bg-white rounded-2xl p-2 shadow-2xl shadow-purple-300/50 rotate-6 border border-white/80 hover:rotate-0 hover:z-20 transition-all duration-300">
               <img src="https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=400&h=400&fit=crop" alt="Preview 4" className="aspect-square w-full rounded-xl object-cover mb-1.5" />
               <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=400&fit=crop" alt="Preview 5" className="aspect-square w-full rounded-xl object-cover mb-1.5" />
@@ -1086,14 +1092,9 @@ export default function Home() {
       <section id="cara-pakai" className="relative px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-rose-500 text-xs font-bold mb-4 shadow-sm">
-              🎯 CARA PAKAI
-            </span>
-            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900`}>
-              Cuma 3 langkah, langsung jadi
-            </h2>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-rose-500 text-xs font-bold mb-4 shadow-sm">🎯 CARA PAKAI</span>
+            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900`}>Cuma 3 langkah, langsung jadi</h2>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { num: "01", title: "Upload foto", desc: "Pilih 1-6 foto dari galeri kamu", emoji: "📸" },
@@ -1101,9 +1102,7 @@ export default function Home() {
               { num: "03", title: "Download HD", desc: "Hasil tajam, siap posting ke medsos", emoji: "⬇️" },
             ].map((step, i) => (
               <div key={i} className="relative bg-white/70 backdrop-blur-xl rounded-3xl p-7 shadow-xl shadow-purple-200/30 hover:shadow-2xl hover:shadow-rose-200/40 hover:-translate-y-1 transition-all border border-white/80">
-                <div className={`${space.className} text-6xl font-bold bg-gradient-to-br from-rose-300 to-purple-300 bg-clip-text text-transparent mb-3`}>
-                  {step.num}
-                </div>
+                <div className={`${space.className} text-6xl font-bold bg-gradient-to-br from-rose-300 to-purple-300 bg-clip-text text-transparent mb-3`}>{step.num}</div>
                 <div className="text-3xl mb-3">{step.emoji}</div>
                 <h3 className={`${space.className} text-lg font-bold mb-2 text-purple-900`}>{step.title}</h3>
                 <p className="text-sm text-purple-700/70 leading-relaxed">{step.desc}</p>
@@ -1117,14 +1116,9 @@ export default function Home() {
       <section id="fitur" className="relative px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-16">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-pink-500 text-xs font-bold mb-4 shadow-sm">
-              ✨ FITUR
-            </span>
-            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900`}>
-              Semua yang kamu butuhin, tanpa yang gak perlu.
-            </h2>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-pink-500 text-xs font-bold mb-4 shadow-sm">✨ FITUR</span>
+            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900`}>Semua yang kamu butuhin, tanpa yang gak perlu.</h2>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-7 shadow-xl shadow-purple-200/30 hover:shadow-2xl hover:shadow-rose-200/40 hover:-translate-y-1 transition-all border border-white/80">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-200 to-rose-300 flex items-center justify-center mb-4 text-2xl shadow-lg shadow-rose-200/50">📐</div>
@@ -1149,17 +1143,12 @@ export default function Home() {
       <section id="editor" className="relative px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-12">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-purple-500 text-xs font-bold mb-4 shadow-sm">
-              🎨 EDITOR
-            </span>
-            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight mb-3 text-purple-900`}>
-              Bikin photostrip kamu
-            </h2>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-purple-500 text-xs font-bold mb-4 shadow-sm">🎨 EDITOR</span>
+            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight mb-3 text-purple-900`}>Bikin photostrip kamu</h2>
             <p className="text-sm text-purple-700/70">Pilih layout, upload foto, atur tampilan, download.</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8 items-start">
-            {/* ✅ order-2 di HP, order-1 di desktop → canvas muncul DULU di HP */}
             <div className="space-y-5 lg:sticky lg:top-24 order-2 lg:order-1">
               <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-5 shadow-xl shadow-purple-200/30 border border-white/80">
                 <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-600">📐 Layout</h3>
@@ -1169,15 +1158,11 @@ export default function Home() {
                       key={l.id}
                       onClick={() => handleLayoutChange(l.id)}
                       className={`aspect-square rounded-2xl flex flex-col items-center justify-center text-[10px] font-bold transition-all ${
-                        currentLayout === l.id
-                          ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
-                          : "bg-white/60 text-purple-700 hover:bg-white hover:shadow-md"
+                        currentLayout === l.id ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105" : "bg-white/60 text-purple-700 hover:bg-white hover:shadow-md"
                       }`}
                     >
                       <span className="text-base font-bold">{l.count}</span>
-                      <span className="text-[9px] leading-tight mt-0.5 text-center">
-                        {l.id === "koran-garut" ? "Koran" : "Foto"}
-                      </span>
+                      <span className="text-[9px] leading-tight mt-0.5 text-center">{l.id === "koran-garut" ? "Koran" : "Foto"}</span>
                     </button>
                   ))}
                 </div>
@@ -1187,51 +1172,25 @@ export default function Home() {
                 <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-5 shadow-xl shadow-purple-200/30 border border-white/80">
                   <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-600">🎨 Warna Koran</h3>
                   <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => setGarutBW(true)}
-                      className={`py-3 rounded-2xl text-xs font-bold transition-all ${
-                        garutBW
-                          ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
-                          : "bg-white/60 text-purple-700 hover:bg-white"
-                      }`}
-                    >
-                      🖤 Hitam Putih
-                    </button>
-                    <button
-                      onClick={() => setGarutBW(false)}
-                      className={`py-3 rounded-2xl text-xs font-bold transition-all ${
-                        !garutBW
-                          ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
-                          : "bg-white/60 text-purple-700 hover:bg-white"
-                      }`}
-                    >
-                      ✨ Berwarna
-                    </button>
+                    <button onClick={() => setGarutBW(true)} className={`py-3 rounded-2xl text-xs font-bold transition-all ${garutBW ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105" : "bg-white/60 text-purple-700 hover:bg-white"}`}>🖤 Hitam Putih</button>
+                    <button onClick={() => setGarutBW(false)} className={`py-3 rounded-2xl text-xs font-bold transition-all ${!garutBW ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105" : "bg-white/60 text-purple-700 hover:bg-white"}`}>✨ Berwarna</button>
                   </div>
                 </div>
               )}
 
               <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-5 shadow-xl shadow-purple-200/30 border border-white/80">
-                <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-600">
-                  📸 Foto ({images.length}/{maxPhotos})
-                </h3>
+                <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-600">📸 Foto ({images.length}/{maxPhotos})</h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto mb-3">
                   {Array.from({ length: maxPhotos }).map((_, i) => (
                     <div key={i} className="flex items-center gap-3 p-2 rounded-2xl bg-white/60">
                       <div className="w-10 h-10 rounded-xl overflow-hidden bg-purple-50 flex-shrink-0 flex items-center justify-center">
-                        {images[i] ? (
-                          <img src={images[i].src} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-purple-300 text-sm">+</span>
-                        )}
+                        {images[i] ? <img src={images[i].src} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" /> : <span className="text-purple-300 text-sm">+</span>}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-purple-700">Foto {i + 1}</p>
                         <p className="text-[10px] text-purple-400 truncate">{images[i] ? "Siap" : "Belum diisi"}</p>
                       </div>
-                      {images[i] && (
-                        <button onClick={() => removePhoto(i)} className="text-purple-300 hover:text-rose-500 text-xs font-bold px-2">✕</button>
-                      )}
+                      {images[i] && <button onClick={() => removePhoto(i)} className="text-purple-300 hover:text-rose-500 text-xs font-bold px-2">✕</button>}
                     </div>
                   ))}
                 </div>
@@ -1248,31 +1207,17 @@ export default function Home() {
                     <div className="grid grid-cols-5 gap-2 max-h-64 overflow-y-auto pr-1">
                       {BACKGROUNDS.map((b) => {
                         const isSelected = currentBg === b.id;
-                        const bgStyle =
-                          b.type === "none"
-                            ? "repeating-conic-gradient(#e5e7eb 0% 25%, #ffffff 0% 50%) 50% / 8px 8px"
-                            : b.type === "custom"
-                            ? customBgImage
-                              ? `url(${customBgImage.src}) center/cover`
-                              : "repeating-linear-gradient(45deg, #ddd 0, #ddd 4px, #fff 4px, #fff 8px)"
-                            : b.color;
+                        const bgStyle = b.type === "none" ? "repeating-conic-gradient(#e5e7eb 0% 25%, #ffffff 0% 50%) 50% / 8px 8px" : b.type === "custom" ? (customBgImage ? `url(${customBgImage.src}) center/cover` : "repeating-linear-gradient(45deg, #ddd 0, #ddd 4px, #fff 4px, #fff 8px)") : b.color;
                         return (
                           <button
                             key={b.id}
                             onClick={() => {
                               if (b.type === "custom") {
-                                if (customBgImage) {
-                                  setCurrentBg("custom");
-                                } else {
-                                  customBgInputRef.current?.click();
-                                }
-                              } else {
-                                setCurrentBg(b.id);
-                              }
+                                if (customBgImage) setCurrentBg("custom");
+                                else customBgInputRef.current?.click();
+                              } else setCurrentBg(b.id);
                             }}
-                            className={`aspect-square rounded-xl transition-all text-lg flex items-center justify-center overflow-hidden ${
-                              isSelected ? "ring-2 ring-rose-400 ring-offset-2 scale-105 shadow-lg" : "hover:scale-105 hover:shadow-md"
-                            }`}
+                            className={`aspect-square rounded-xl transition-all text-lg flex items-center justify-center overflow-hidden ${isSelected ? "ring-2 ring-rose-400 ring-offset-2 scale-105 shadow-lg" : "hover:scale-105 hover:shadow-md"}`}
                             style={{ background: bgStyle, backgroundSize: "cover" }}
                             title={b.label}
                           >
@@ -1286,153 +1231,77 @@ export default function Home() {
                     </div>
                     <input ref={customBgInputRef} type="file" accept="image/*" onChange={handleCustomBgUpload} className="hidden" />
                     {customBgImage && (
-                      <button
-                        onClick={() => {
-                          setCustomBgImage(null);
-                          if (currentBg === "custom") setCurrentBg("none");
-                        }}
-                        className="mt-2 w-full text-[10px] text-rose-500 hover:text-rose-700 font-bold py-1"
-                      >
-                        Hapus background sendiri
-                      </button>
+                      <button onClick={() => { setCustomBgImage(null); if (currentBg === "custom") setCurrentBg("none"); }} className="mt-2 w-full text-[10px] text-rose-500 hover:text-rose-700 font-bold py-1">Hapus background sendiri</button>
                     )}
-
                     {currentBg !== "none" && (
                       <div className="mt-4 pt-4 border-t border-purple-200 space-y-4">
                         <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold text-purple-700">Posisi Strip</span>
-                          </div>
+                          <div className="flex items-center justify-between mb-2"><span className="text-xs font-bold text-purple-700">Posisi Strip</span></div>
                           <div className="grid grid-cols-2 gap-2">
-                            <button
-                              onClick={() => setStripPosition("left")}
-                              className={`py-3 rounded-xl text-xs font-bold transition-all ${
-                                stripPosition === "left"
-                                  ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
-                                  : "bg-white/60 text-purple-700 hover:bg-white"
-                              }`}
-                            >
-                              ← Kiri
-                            </button>
-                            <button
-                              onClick={() => setStripPosition("center")}
-                              className={`py-3 rounded-xl text-xs font-bold transition-all ${
-                                stripPosition === "center"
-                                  ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
-                                  : "bg-white/60 text-purple-700 hover:bg-white"
-                              }`}
-                            >
-                              ↕ Tengah
-                            </button>
-                            <button
-                              onClick={() => setStripPosition("right")}
-                              className={`py-3 rounded-xl text-xs font-bold transition-all ${
-                                stripPosition === "right"
-                                  ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
-                                  : "bg-white/60 text-purple-700 hover:bg-white"
-                              }`}
-                            >
-                              Kanan →
-                            </button>
-                            <button
-                              onClick={() => setStripPosition("bottom")}
-                              className={`py-3 rounded-xl text-xs font-bold transition-all ${
-                                stripPosition === "bottom"
-                                  ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
-                                  : "bg-white/60 text-purple-700 hover:bg-white"
-                              }`}
-                            >
-                              ↓ Bawah
-                            </button>
+                            {(["left", "center", "right", "bottom"] as const).map((pos) => (
+                              <button key={pos} onClick={() => setStripPosition(pos)} className={`py-3 rounded-xl text-xs font-bold transition-all ${stripPosition === pos ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105" : "bg-white/60 text-purple-700 hover:bg-white"}`}>
+                                {pos === "left" && "← Kiri"}
+                                {pos === "center" && "↕ Tengah"}
+                                {pos === "right" && "Kanan →"}
+                                {pos === "bottom" && "↓ Bawah"}
+                              </button>
+                            ))}
                           </div>
                         </div>
-
                         <div>
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-bold text-purple-700">Ukuran Strip</span>
-                            <span className={`${space.className} text-xs font-bold text-purple-500`}>
-                              {Math.round(stripScale * 100)}%
-                            </span>
+                            <span className={`${space.className} text-xs font-bold text-purple-500`}>{Math.round(stripScale * 100)}%</span>
                           </div>
-                          <input
-                            type="range"
-                            min="0.5"
-                            max="1"
-                            step="0.01"
-                            value={stripScale}
-                            onChange={(e) => setStripScale(parseFloat(e.target.value))}
-                            className="w-full accent-rose-400"
-                          />
-                          <div className="flex justify-between text-[10px] text-purple-400 font-bold mt-1">
-                            <span>Kecil</span>
-                            <span>Besar</span>
-                          </div>
+                          <input type="range" min="0.5" max="1" step="0.01" value={stripScale} onChange={(e) => setStripScale(parseFloat(e.target.value))} className="w-full accent-rose-400" />
+                          <div className="flex justify-between text-[10px] text-purple-400 font-bold mt-1"><span>Kecil</span><span>Besar</span></div>
                         </div>
-
-                        <p className="text-[10px] text-purple-400 font-medium text-center">
-                          Canvas otomatis kotak 1:1 buat IG/TikTok
-                        </p>
+                        <p className="text-[10px] text-purple-400 font-medium text-center">Canvas otomatis kotak 1:1 buat IG/TikTok</p>
                       </div>
                     )}
                   </div>
 
+                  {/* ✅ STICKER — auto-position di ujung-ujung kotak */}
                   <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-5 shadow-xl shadow-purple-200/30 border border-white/80">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-2">
                       <h3 className="text-xs font-bold uppercase tracking-widest text-purple-600">✨ Stiker</h3>
-                      {stickers.length > 0 && (
-                        <button onClick={clearStickers} className="text-xs text-rose-500 hover:text-rose-700 font-bold">
-                          Hapus semua
-                        </button>
-                      )}
+                      {stickers.length > 0 && <button onClick={clearStickers} className="text-xs text-rose-500 hover:text-rose-700 font-bold">Hapus semua</button>}
                     </div>
-                    {/* ✅ Grid stiker adaptif */}
+                    <p className="text-[10px] text-purple-400 font-medium mb-3">
+                      Tap emoji → muncul di ujung-ujung photostrip. Tap lagi buat nambah di ujung lain ✨
+                    </p>
                     <div className="grid grid-cols-6 sm:grid-cols-8 gap-1.5">
                       {STICKER_PRESETS.map((emoji) => (
-                        <button
-                          key={emoji}
-                          onClick={() => addSticker(emoji)}
-                          className="aspect-square rounded-xl bg-white/60 hover:bg-white text-lg flex items-center justify-center transition-all hover:scale-110 hover:shadow-md"
-                        >
-                          {emoji}
-                        </button>
+                        <button key={emoji} onClick={() => addSticker(emoji)} className="aspect-square rounded-xl bg-white/60 hover:bg-white text-lg flex items-center justify-center transition-all hover:scale-110 hover:shadow-md">{emoji}</button>
                       ))}
                     </div>
-                    {selectedSticker !== null && (
+
+                    {stickers.length > 0 && (
                       <div className="mt-3 p-3 rounded-2xl bg-white/60">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-bold text-purple-700">Stiker terpilih</span>
-                          <button onClick={() => removeSticker(selectedSticker)} className="text-xs text-rose-500 hover:text-rose-700 font-bold">
-                            Hapus
-                          </button>
+                          <span className="text-xs font-bold text-purple-700">{stickers.length} stiker terpasang</span>
+                          <button onClick={undoLastSticker} className="text-xs text-rose-500 hover:text-rose-700 font-bold">Undo</button>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-purple-400 font-bold">Kecil</span>
-                          <input
-                            type="range"
-                            min="0.04"
-                            max="0.3"
-                            step="0.01"
-                            value={stickers.find((s) => s.id === selectedSticker)?.size || 0.1}
-                            onChange={(e) => updateStickerSize(selectedSticker, parseFloat(e.target.value))}
-                            className="flex-1 accent-rose-400"
-                          />
-                          <span className="text-[10px] text-purple-400 font-bold">Besar</span>
-                        </div>
+                        {selectedSticker !== null && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-purple-400 font-bold">Kecil</span>
+                            <input type="range" min="0.04" max="0.2" step="0.01" value={stickers.find((s) => s.id === selectedSticker)?.size || 0.08} onChange={(e) => updateStickerSize(selectedSticker, parseFloat(e.target.value))} className="flex-1 accent-rose-400" />
+                            <span className="text-[10px] text-purple-400 font-bold">Besar</span>
+                          </div>
+                        )}
+                        <p className="text-[10px] text-purple-400 font-medium mt-2">Atur ukuran stiker terakhir di atas</p>
                       </div>
                     )}
                   </div>
 
                   <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-5 shadow-xl shadow-purple-200/30 border border-white/80">
                     <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-600">🖼️ Bingkai</h3>
-                    {/* ✅ Grid bingkai adaptif */}
                     <div className="grid grid-cols-5 sm:grid-cols-6 gap-2 max-h-72 overflow-y-auto pr-1">
                       {FRAMES.map((f) => (
                         <button
                           key={f.id}
                           onClick={() => setCurrentFrame(f.id)}
-                          className={`aspect-square rounded-xl transition-all relative overflow-hidden ${
-                            currentFrame === f.id ? "ring-2 ring-rose-400 ring-offset-2 scale-105 shadow-lg z-10" : "hover:scale-105 hover:shadow-md"
-                          }`}
+                          className={`aspect-square rounded-xl transition-all relative overflow-hidden ${currentFrame === f.id ? "ring-2 ring-rose-400 ring-offset-2 scale-105 shadow-lg z-10" : "hover:scale-105 hover:shadow-md"}`}
                           style={{ background: f.bg }}
                           title={f.label}
                         >
@@ -1448,18 +1317,9 @@ export default function Home() {
 
                   <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-5 shadow-xl shadow-purple-200/30 border border-white/80">
                     <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-600">🎨 Filter</h3>
-                    {/* ✅ Grid filter adaptif */}
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                       {FILTERS.map((f) => (
-                        <button
-                          key={f.value}
-                          onClick={() => setCurrentFilter(f.value)}
-                          className={`aspect-square rounded-2xl flex flex-col items-center justify-center text-xs font-bold transition-all ${
-                            currentFilter === f.value
-                              ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
-                              : "bg-white/60 text-purple-700 hover:bg-white hover:shadow-md"
-                          }`}
-                        >
+                        <button key={f.value} onClick={() => setCurrentFilter(f.value)} className={`aspect-square rounded-2xl flex flex-col items-center justify-center text-xs font-bold transition-all ${currentFilter === f.value ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105" : "bg-white/60 text-purple-700 hover:bg-white hover:shadow-md"}`}>
                           <span className="text-lg mb-0.5">{f.emoji}</span>
                           <span className="text-[10px] leading-tight">{f.label}</span>
                         </button>
@@ -1467,32 +1327,26 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* ✅ CAPTION dengan gaya tulisan */}
                   <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-5 shadow-xl shadow-purple-200/30 border border-white/80">
                     <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-purple-600">✍️ Caption</h3>
                     <input
+                      ref={captionRef}
                       type="text"
-                      value={caption}
-                      onChange={(e) => setCaption(e.target.value)}
+                      defaultValue={caption}
+                      onChange={handleCaptionChange}
                       placeholder="Contoh: 2025 vibes"
                       maxLength={30}
                       className="w-full px-4 py-3 rounded-2xl bg-white/80 text-purple-900 text-sm placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-rose-300 transition-all font-medium mb-3"
                     />
+                    <p className="text-[10px] text-purple-400 font-medium mb-3">Teks muncul di canvas setelah kamu berhenti ngetik sebentar ✨</p>
 
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-purple-500 mb-2">
-                      Gaya Tulisan
-                    </p>
-                    {/* ✅ Grid caption style adaptif */}
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-purple-500 mb-2">Gaya Tulisan</p>
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                       {CAPTION_STYLES.map((s) => (
                         <button
                           key={s.id}
                           onClick={() => setCaptionStyle(s.id)}
-                          className={`aspect-square rounded-2xl flex flex-col items-center justify-center text-xs font-bold transition-all ${
-                            captionStyle === s.id
-                              ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105"
-                              : "bg-white/60 text-purple-700 hover:bg-white hover:shadow-md"
-                          }`}
+                          className={`aspect-square rounded-2xl flex flex-col items-center justify-center text-xs font-bold transition-all ${captionStyle === s.id ? "bg-gradient-to-br from-rose-400 to-pink-400 text-white shadow-lg shadow-rose-300/50 scale-105" : "bg-white/60 text-purple-700 hover:bg-white hover:shadow-md"}`}
                         >
                           <span className="text-lg mb-0.5">{s.emoji}</span>
                           <span className="text-[9px] leading-tight">{s.label}</span>
@@ -1504,58 +1358,17 @@ export default function Home() {
               )}
             </div>
 
-            {/* ✅ order-1 di HP, order-2 di desktop → canvas muncul DULU di HP */}
             <div className="flex flex-col items-center order-1 lg:order-2">
               <div className="w-full bg-white/70 backdrop-blur-xl rounded-3xl p-4 sm:p-6 shadow-2xl shadow-purple-300/30 border border-white/80">
                 <div className="relative inline-block w-full">
-                  <canvas
-                    ref={canvasRef}
-                    className="block mx-auto rounded-2xl"
-                    style={{ maxWidth: "100%", maxHeight: isGarut ? "85vh" : "60vh", height: "auto" }}
-                  />
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    onPointerMove={handleCanvasPointerMove}
-                    onPointerUp={handleCanvasPointerUp}
-                    onPointerLeave={handleCanvasPointerUp}
-                  >
-                    {!isGarut && stickers.map((s) => (
-                      <div
-                        key={s.id}
-                        onPointerDown={(e) => handleStickerPointerDown(e, s.id)}
-                        className={`absolute pointer-events-auto cursor-move select-none ${
-                          selectedSticker === s.id ? "ring-2 ring-rose-400 ring-offset-2 rounded" : ""
-                        }`}
-                        style={{
-                          left: `${s.x * 100}%`,
-                          top: `${s.y * 100}%`,
-                          transform: "translate(-50%, -50%)",
-                          lineHeight: 1,
-                        }}
-                      >
-                        <span style={{ fontSize: `clamp(12px, ${s.size * 100}%, 200px)`, display: "block" }}>
-                          {s.emoji}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                  <canvas ref={canvasRef} className="block mx-auto rounded-2xl" style={{ maxWidth: "100%", maxHeight: isGarut ? "85vh" : "60vh", height: "auto" }} />
+                  {/* ✅ Overlay HTML sticker DIHAPUS — sticker cuma di canvas */}
                 </div>
               </div>
 
               <div className="flex justify-center gap-3 mt-6 flex-wrap">
-                <button
-                  onClick={handleDownload}
-                  disabled={images.length === 0}
-                  className="px-8 py-3.5 rounded-full bg-gradient-to-r from-rose-400 to-pink-400 text-white font-bold text-sm shadow-xl shadow-rose-300/50 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  ⬇️ Download
-                </button>
-                <button
-                  onClick={handleReset}
-                  className="px-6 py-3.5 rounded-full bg-white/80 backdrop-blur text-purple-700 font-bold text-sm shadow-lg shadow-purple-200/50 hover:shadow-xl hover:scale-105 active:scale-95 transition-all"
-                >
-                  🔄 Reset
-                </button>
+                <button onClick={handleDownload} disabled={images.length === 0} className="px-8 py-3.5 rounded-full bg-gradient-to-r from-rose-400 to-pink-400 text-white font-bold text-sm shadow-xl shadow-rose-300/50 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">⬇️ Download HD</button>
+                <button onClick={handleReset} className="px-6 py-3.5 rounded-full bg-white/80 backdrop-blur text-purple-700 font-bold text-sm shadow-lg shadow-purple-200/50 hover:shadow-xl hover:scale-105 active:scale-95 transition-all">🔄 Reset</button>
               </div>
 
               <p className="text-center text-sm text-purple-700/70 mt-4 font-bold">{status}</p>
@@ -1564,23 +1377,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TESTIMONI / KATA MEREKA */}
+      {/* TESTIMONI */}
       <section className="relative px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-rose-500 text-xs font-bold mb-4 shadow-sm">
-              💬 KATA MEREKA
-            </span>
-            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900 mb-4`}>
-              Udah dipake banyak orang
-            </h2>
-
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-rose-500 text-xs font-bold mb-4 shadow-sm">💬 KATA MEREKA</span>
+            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900 mb-4`}>Udah dipake banyak orang</h2>
             <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white/70 backdrop-blur border border-white/80 shadow-md">
               <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <span key={star} className={`text-lg ${star <= Math.round(Number(avgRating)) ? "text-yellow-400" : "text-gray-300"}`}>
-                    ★
-                  </span>
+                  <span key={star} className={`text-lg ${star <= Math.round(Number(avgRating)) ? "text-yellow-400" : "text-gray-300"}`}>★</span>
                 ))}
               </div>
               <span className={`${space.className} text-sm font-bold text-purple-900`}>{avgRating}</span>
@@ -1588,28 +1394,17 @@ export default function Home() {
               <span className="text-xs text-purple-500 font-bold">{displayReviews.length} rating</span>
             </div>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {displayReviews.slice(0, 6).map((t, i) => (
-              <div
-                key={i}
-                className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-xl shadow-purple-200/30 hover:shadow-2xl hover:-translate-y-1 transition-all border border-white/80"
-              >
+              <div key={i} className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-xl shadow-purple-200/30 hover:shadow-2xl hover:-translate-y-1 transition-all border border-white/80">
                 <div className="flex items-center gap-1 mb-3">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <span
-                      key={star}
-                      className={`text-sm ${star <= (t.rating || 5) ? "text-yellow-400" : "text-gray-300"}`}
-                    >
-                      ★
-                    </span>
+                    <span key={star} className={`text-sm ${star <= (t.rating || 5) ? "text-yellow-400" : "text-gray-300"}`}>★</span>
                   ))}
                 </div>
                 <p className="text-sm text-purple-800 leading-relaxed mb-4 font-medium">"{t.text}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-rose-200 to-purple-200 flex items-center justify-center text-xs font-bold text-purple-700">
-                    {t.name[0]}
-                  </div>
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-rose-200 to-purple-200 flex items-center justify-center text-xs font-bold text-purple-700">{t.name[0]}</div>
                   <span className="text-xs font-bold text-purple-700">{t.name}</span>
                 </div>
               </div>
@@ -1622,46 +1417,21 @@ export default function Home() {
       <section id="faq" className="relative px-6 py-20">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-14">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-purple-500 text-xs font-bold mb-4 shadow-sm">
-              ❓ FAQ
-            </span>
-            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900`}>
-              Pertanyaan yang sering ditanya
-            </h2>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-white/70 backdrop-blur text-purple-500 text-xs font-bold mb-4 shadow-sm">❓ FAQ</span>
+            <h2 className={`${space.className} text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900`}>Pertanyaan yang sering ditanya</h2>
           </div>
-
           <div className="space-y-3">
             {FAQS.map((faq, i) => {
               const isOpen = openFaq === i;
               return (
-                <div
-                  key={i}
-                  className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/80 shadow-lg shadow-purple-200/20 overflow-hidden transition-all"
-                >
-                  <button
-                    onClick={() => setOpenFaq(isOpen ? null : i)}
-                    className="w-full flex items-center justify-between gap-4 px-5 sm:px-6 py-5 text-left hover:bg-white/50 transition-all"
-                  >
-                    <span className={`${space.className} text-sm md:text-base font-bold text-purple-900`}>
-                      {faq.q}
-                    </span>
-                    <span
-                      className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-rose-200 to-purple-200 flex items-center justify-center text-purple-700 font-bold text-sm transition-transform ${
-                        isOpen ? "rotate-45" : "rotate-0"
-                      }`}
-                    >
-                      +
-                    </span>
+                <div key={i} className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/80 shadow-lg shadow-purple-200/20 overflow-hidden transition-all">
+                  <button onClick={() => setOpenFaq(isOpen ? null : i)} className="w-full flex items-center justify-between gap-4 px-5 sm:px-6 py-5 text-left hover:bg-white/50 transition-all">
+                    <span className={`${space.className} text-sm md:text-base font-bold text-purple-900`}>{faq.q}</span>
+                    <span className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-rose-200 to-purple-200 flex items-center justify-center text-purple-700 font-bold text-sm transition-transform ${isOpen ? "rotate-45" : "rotate-0"}`}>+</span>
                   </button>
-                  <div
-                    className={`grid transition-all duration-300 ease-in-out ${
-                      isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-                    }`}
-                  >
+                  <div className={`grid transition-all duration-300 ease-in-out ${isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
                     <div className="overflow-hidden">
-                      <p className="px-5 sm:px-6 pb-5 text-sm text-purple-700/80 leading-relaxed font-medium">
-                        {faq.a}
-                      </p>
+                      <p className="px-5 sm:px-6 pb-5 text-sm text-purple-700/80 leading-relaxed font-medium">{faq.a}</p>
                     </div>
                   </div>
                 </div>
@@ -1674,98 +1444,47 @@ export default function Home() {
       {/* CTA FINAL */}
       <section className="relative px-6 py-20">
         <div className="max-w-3xl mx-auto text-center bg-gradient-to-br from-rose-200/60 via-pink-200/60 to-purple-200/60 backdrop-blur-xl rounded-3xl p-8 sm:p-12 shadow-2xl shadow-rose-200/40 border border-white/80">
-          <h2 className={`${space.className} text-2xl sm:text-3xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900 mb-4`}>
-            Siap bikin photostrip kamu?
-          </h2>
-          <p className="text-sm md:text-base text-purple-700/80 mb-8 font-medium">
-            Gratis, tanpa login, tanpa watermark. Tinggal upload dan jadi.
-          </p>
-          <a
-            href="#editor"
-            className="inline-block px-8 py-4 rounded-full bg-gradient-to-r from-rose-400 to-pink-400 text-white font-bold text-sm shadow-xl shadow-rose-300/50 hover:shadow-2xl hover:shadow-rose-400/60 hover:scale-105 active:scale-95 transition-all"
-          >
-            Gas mulai sekarang
-          </a>
+          <h2 className={`${space.className} text-2xl sm:text-3xl md:text-5xl font-bold leading-tight tracking-tight text-purple-900 mb-4`}>Siap bikin photostrip kamu?</h2>
+          <p className="text-sm md:text-base text-purple-700/80 mb-8 font-medium">Gratis, tanpa login, tanpa watermark. Tinggal upload dan jadi.</p>
+          <a href="#editor" className="inline-block px-8 py-4 rounded-full bg-gradient-to-r from-rose-400 to-pink-400 text-white font-bold text-sm shadow-xl shadow-rose-300/50 hover:shadow-2xl hover:shadow-rose-400/60 hover:scale-105 active:scale-95 transition-all">Gas mulai sekarang</a>
         </div>
       </section>
 
-      {/* FOOTER LENGKAP */}
+      {/* FOOTER */}
       <footer className="relative px-6 pt-16 pb-8 mt-10 border-t border-white/60 bg-white/40 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-400 to-purple-400 flex items-center justify-center shadow-lg shadow-rose-200/50">
-                  <span className="text-white text-base">📸</span>
-                </div>
-                <span className={`${space.className} font-bold text-lg tracking-tight text-purple-900`}>
-                  Photostrip
-                </span>
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-400 to-purple-400 flex items-center justify-center shadow-lg shadow-rose-200/50"><span className="text-white text-base">📸</span></div>
+                <span className={`${space.className} font-bold text-lg tracking-tight text-purple-900`}>Photostrip</span>
               </div>
-              <p className="text-sm text-purple-700/70 leading-relaxed font-medium max-w-md mb-5">
-                Bikin photostrip atau koran aesthetic langsung dari browser. Gratis, tanpa login, tanpa watermark. Semua proses terjadi di HP kamu sendiri.
-              </p>
+              <p className="text-sm text-purple-700/70 leading-relaxed font-medium max-w-md mb-5">Bikin photostrip atau koran aesthetic langsung dari browser. Gratis, tanpa login, tanpa watermark. Semua proses terjadi di HP kamu sendiri.</p>
               <div className="flex gap-2">
-                {[
-                  { label: "TikTok", emoji: "🎵" },
-                  { label: "Instagram", emoji: "📷" },
-                  { label: "Twitter", emoji: "🐦" },
-                  { label: "YouTube", emoji: "▶️" },
-                ].map((sos, i) => (
-                  <button
-                    key={i}
-                    title={sos.label}
-                    className="w-10 h-10 rounded-xl bg-white/70 border border-white/80 flex items-center justify-center text-lg shadow-md shadow-purple-200/30 hover:shadow-lg hover:scale-110 transition-all"
-                  >
-                    {sos.emoji}
-                  </button>
+                {[{ label: "TikTok", emoji: "🎵" }, { label: "Instagram", emoji: "📷" }, { label: "Twitter", emoji: "🐦" }, { label: "YouTube", emoji: "▶️" }].map((sos, i) => (
+                  <button key={i} title={sos.label} className="w-10 h-10 rounded-xl bg-white/70 border border-white/80 flex items-center justify-center text-lg shadow-md shadow-purple-200/30 hover:shadow-lg hover:scale-110 transition-all">{sos.emoji}</button>
                 ))}
               </div>
             </div>
-
             <div>
-              <h4 className={`${space.className} text-xs font-bold uppercase tracking-widest text-purple-900 mb-4`}>
-                Menu
-              </h4>
+              <h4 className={`${space.className} text-xs font-bold uppercase tracking-widest text-purple-900 mb-4`}>Menu</h4>
               <ul className="space-y-2.5">
-                {[
-                  { label: "Mulai Bikin", href: "#editor" },
-                  { label: "Fitur", href: "#fitur" },
-                  { label: "Cara Pakai", href: "#cara-pakai" },
-                  { label: "FAQ", href: "#faq" },
-                ].map((link, i) => (
-                  <li key={i}>
-                    <a
-                      href={link.href}
-                      className="text-sm text-purple-700/70 hover:text-purple-900 font-medium transition-colors"
-                    >
-                      {link.label}
-                    </a>
-                  </li>
+                {[{ label: "Mulai Bikin", href: "#editor" }, { label: "Fitur", href: "#fitur" }, { label: "Cara Pakai", href: "#cara-pakai" }, { label: "FAQ", href: "#faq" }].map((link, i) => (
+                  <li key={i}><a href={link.href} className="text-sm text-purple-700/70 hover:text-purple-900 font-medium transition-colors">{link.label}</a></li>
                 ))}
               </ul>
             </div>
-
             <div>
-              <h4 className={`${space.className} text-xs font-bold uppercase tracking-widest text-purple-900 mb-4`}>
-                Bantuan
-              </h4>
+              <h4 className={`${space.className} text-xs font-bold uppercase tracking-widest text-purple-900 mb-4`}>Bantuan</h4>
               <ul className="space-y-2.5">
                 {["Cara Pakai", "Tips Biar Hasilnya Bagus", "Laporkan Bug", "Hubungi Kami"].map((label, i) => (
-                  <li key={i}>
-                    <button className="text-sm text-purple-700/70 hover:text-purple-900 font-medium transition-colors text-left">
-                      {label}
-                    </button>
-                  </li>
+                  <li key={i}><button className="text-sm text-purple-700/70 hover:text-purple-900 font-medium transition-colors text-left">{label}</button></li>
                 ))}
               </ul>
             </div>
           </div>
-
           <div className="border-t border-purple-200/50 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs font-bold text-purple-500 text-center md:text-left">
-              © {new Date().getFullYear()} Photostrip · Dibuat dengan 💜 buat kamu
-            </p>
+            <p className="text-xs font-bold text-purple-500 text-center md:text-left">© {new Date().getFullYear()} Photostrip · Dibuat dengan 💜 buat kamu</p>
             <div className="flex gap-5">
               <button className="text-xs font-bold text-purple-500 hover:text-purple-800 transition-colors">Privacy</button>
               <button className="text-xs font-bold text-purple-500 hover:text-purple-800 transition-colors">Terms</button>
@@ -1775,59 +1494,25 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* ===== REVIEW POPUP ===== */}
+      {/* REVIEW POPUP */}
       {showReviewPopup && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-[fadeIn_0.3s_ease]"
-          onClick={() => !reviewSubmitted && setShowReviewPopup(false)}
-        >
-          <div
-            className="relative bg-white rounded-3xl p-6 sm:p-7 md:p-8 shadow-2xl max-w-md w-full border border-white/80 animate-[popIn_0.4s_ease]"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-[fadeIn_0.3s_ease]" onClick={() => !reviewSubmitted && setShowReviewPopup(false)}>
+          <div className="relative bg-white rounded-3xl p-6 sm:p-7 md:p-8 shadow-2xl max-w-md w-full border border-white/80 animate-[popIn_0.4s_ease]" onClick={(e) => e.stopPropagation()}>
             {!reviewSubmitted ? (
               <>
-                <button
-                  onClick={() => setShowReviewPopup(false)}
-                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 font-bold transition-all"
-                >
-                  ✕
-                </button>
-
+                <button onClick={() => setShowReviewPopup(false)} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 font-bold transition-all">✕</button>
                 <div className="text-center mb-6">
                   <div className="text-5xl mb-3">🎉</div>
-                  <h3 className={`${space.className} text-xl sm:text-2xl font-bold text-purple-900 mb-2`}>
-                    Gimana hasilnya?
-                  </h3>
-                  <p className="text-sm text-purple-600 font-medium">
-                    Kasih rating dong, biar kami terus improve ✨
-                  </p>
+                  <h3 className={`${space.className} text-xl sm:text-2xl font-bold text-purple-900 mb-2`}>Gimana hasilnya?</h3>
+                  <p className="text-sm text-purple-600 font-medium">Kasih rating dong, biar kami terus improve ✨</p>
                 </div>
-
-                {/* ✅ Bintang responsif */}
                 <div className="flex justify-center gap-1 sm:gap-2 mb-6">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onMouseEnter={() => setReviewHover(star)}
-                      onMouseLeave={() => setReviewHover(0)}
-                      onClick={() => setReviewRating(star)}
-                      className="text-4xl sm:text-5xl transition-all hover:scale-125 active:scale-95"
-                    >
-                      <span
-                        className={
-                          star <= (reviewHover || reviewRating)
-                            ? "text-yellow-400 drop-shadow-md"
-                            : "text-gray-300"
-                        }
-                      >
-                        ★
-                      </span>
+                    <button key={star} type="button" onMouseEnter={() => setReviewHover(star)} onMouseLeave={() => setReviewHover(0)} onClick={() => setReviewRating(star)} className="text-4xl sm:text-5xl transition-all hover:scale-125 active:scale-95">
+                      <span className={star <= (reviewHover || reviewRating) ? "text-yellow-400 drop-shadow-md" : "text-gray-300"}>★</span>
                     </button>
                   ))}
                 </div>
-
                 {reviewRating > 0 && (
                   <p className="text-center text-xs font-bold text-purple-500 mb-4">
                     {reviewRating === 5 && "Mantap! 🔥"}
@@ -1837,44 +1522,16 @@ export default function Home() {
                     {reviewRating === 1 && "Maaf ya 😔"}
                   </p>
                 )}
-
-                <input
-                  ref={reviewNameRef}
-                  type="text"
-                  placeholder="Nama kamu (opsional)"
-                  maxLength={20}
-                  className="w-full px-4 py-3 rounded-2xl bg-purple-50 text-purple-900 text-sm placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-rose-300 transition-all font-medium mb-3"
-                />
-
-                <textarea
-                  ref={reviewTextRef}
-                  placeholder="Tulis komentar kamu (opsional)"
-                  maxLength={150}
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-2xl bg-purple-50 text-purple-900 text-sm placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-rose-300 transition-all font-medium resize-none mb-4"
-                />
-
-                <button
-                  onClick={handleSubmitReview}
-                  disabled={reviewRating === 0}
-                  className="w-full px-6 py-3.5 rounded-full bg-gradient-to-r from-rose-400 to-pink-400 text-white font-bold text-sm shadow-xl shadow-rose-300/50 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  Kirim Rating ⭐
-                </button>
-
-                <p className="text-center text-[10px] text-purple-400 font-medium mt-3">
-                  Rating & komentar kamu tersimpan di browser ini
-                </p>
+                <input ref={reviewNameRef} type="text" placeholder="Nama kamu (opsional)" maxLength={20} className="w-full px-4 py-3 rounded-2xl bg-purple-50 text-purple-900 text-sm placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-rose-300 transition-all font-medium mb-3" />
+                <textarea ref={reviewTextRef} placeholder="Tulis komentar kamu (opsional)" maxLength={150} rows={3} className="w-full px-4 py-3 rounded-2xl bg-purple-50 text-purple-900 text-sm placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-rose-300 transition-all font-medium resize-none mb-4" />
+                <button onClick={handleSubmitReview} disabled={reviewRating === 0} className="w-full px-6 py-3.5 rounded-full bg-gradient-to-r from-rose-400 to-pink-400 text-white font-bold text-sm shadow-xl shadow-rose-300/50 hover:shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed">Kirim Rating ⭐</button>
+                <p className="text-center text-[10px] text-purple-400 font-medium mt-3">Rating & komentar kamu tersimpan di browser ini</p>
               </>
             ) : (
               <div className="text-center py-6">
                 <div className="text-6xl mb-4">💖</div>
-                <h3 className={`${space.className} text-2xl font-bold text-purple-900 mb-2`}>
-                  Makasih ya!
-                </h3>
-                <p className="text-sm text-purple-600 font-medium">
-                  Rating kamu udah tersimpan ✨
-                </p>
+                <h3 className={`${space.className} text-2xl font-bold text-purple-900 mb-2`}>Makasih ya!</h3>
+                <p className="text-sm text-purple-600 font-medium">Rating kamu udah tersimpan ✨</p>
               </div>
             )}
           </div>
@@ -1882,14 +1539,8 @@ export default function Home() {
       )}
 
       <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes popIn {
-          from { opacity: 0; transform: scale(0.9) translateY(20px); }
-          to { opacity: 1; transform: scale(1) translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
       `}</style>
     </main>
   );
